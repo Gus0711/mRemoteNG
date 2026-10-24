@@ -15,6 +15,7 @@ using mRemoteNG.Tree.ClickHandlers;
 using mRemoteNG.Tree.Root;
 using mRemoteNG.UI.Controls;
 using mRemoteNG.UI.Controls.ConnectionTree;
+using mRemoteNG.UI.GraphicsUtilities;
 using mRemoteNG.UI.TaskDialog;
 using WeifenLuo.WinFormsUI.Docking;
 using mRemoteNG.Resources.Language;
@@ -44,6 +45,8 @@ namespace mRemoteNG.UI.Window
             DockPnl = panel;
             Icon = Resources.ImageConverter.GetImageAsIcon(Properties.Resources.ASPWebSite_16x);
             InitializeComponent();
+            ApplyModernFonts();
+            msMain.DpiChangedAfterParent += (_, _) => ApplyToolbarIcons();
             // the designer docks the search bar at the bottom; apply the saved preference at startup
             PlaceSearchBar(Settings.Default.PlaceSearchBarAboveConnectionTree);
             SetMenuEventHandlers();
@@ -72,6 +75,41 @@ namespace mRemoteNG.UI.Window
             searchBoxLayoutPanel.Dock = placeSearchBarAboveConnectionTree ? DockStyle.Top : DockStyle.Bottom;
         }
 
+        private void ApplyModernFonts()
+        {
+            ConnectionTree.Font = SidebarFonts.Regular;
+            txtSearch.Font = SidebarFonts.Regular;
+        }
+
+        /// <summary>
+        /// Icon-only header buttons drawn with Fluent glyphs in the secondary text color,
+        /// so they follow the theme and stay crisp at any DPI.
+        /// </summary>
+        private void ApplyToolbarIcons()
+        {
+            Color color = _themeManager is { ThemingActive: true } ? ModernPalette.Current.TextSecondary : SystemColors.ControlText;
+            SetToolbarIcon(mMenAddConnection, FluentIcons.Add, color);
+            SetToolbarIcon(mMenAddFolder, ConnectionTreeIcons.NewFolder, color);
+            SetToolbarIcon(mMenAddRoot, FluentIcons.Network, color);
+            SetToolbarIcon(mMenViewExpandAllFolders, ConnectionTreeIcons.ExpandAllBox, color);
+            SetToolbarIcon(mMenViewCollapseAllFolders, ConnectionTreeIcons.CollapseAllBox, color);
+            SetToolbarIcon(mMenSort, FluentIcons.Sort, color);
+            SetToolbarIcon(mMenFavorites, FluentIcons.Favorite, color);
+        }
+
+        private void SetToolbarIcon(ToolStripMenuItem item, char glyph, Color color)
+        {
+            int size = (int)Math.Round(16 * msMain.DeviceDpi / 96f);
+            int box = (int)Math.Round(28 * msMain.DeviceDpi / 96f);
+            item.Image = FluentIcons.Get(glyph, size, color);
+            item.ImageScaling = ToolStripItemImageScaling.None;
+            item.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            item.AutoSize = false;
+            item.Padding = Padding.Empty;
+            item.Margin = new Padding(0, 0, (int)Math.Round(2 * msMain.DeviceDpi / 96f), 0);
+            item.Size = new Size(box, box);
+        }
+
 
         #region Form Stuff
 
@@ -82,10 +120,6 @@ namespace mRemoteNG.UI.Window
             _themeManager.ThemeChanged += ApplyTheme;
             ApplyTheme();
 
-            txtSearch.Multiline = true;
-            txtSearch.MinimumSize = new Size(0, 14);
-            txtSearch.Size = new Size(txtSearch.Size.Width, 14);
-            txtSearch.Multiline = false;
         }
 
         private void ApplyLanguage()
@@ -101,7 +135,7 @@ namespace mRemoteNG.UI.Window
             mMenSort.ToolTipText = Language.Sort;
             mMenFavorites.ToolTipText = Language.Favorites;
 
-            txtSearch.Text = Language.SearchPrompt;
+            searchBoxLayoutPanel.ApplyLanguage();
         }
 
         internal void RefreshUiLanguage()
@@ -118,24 +152,26 @@ namespace mRemoteNG.UI.Window
 
         private new void ApplyTheme()
         {
+            ApplyToolbarIcons();
+            searchBoxLayoutPanel.ApplyTheme();
+
             if (!_themeManager.ThemingActive)
                 return;
 
             ThemeInfo activeTheme = _themeManager.ActiveTheme;
             vsToolStripExtender.SetStyle(msMain, activeTheme.Version, activeTheme.Theme);
+            vsToolStripExtender.SetStyle(mMenFavorites.DropDown, activeTheme.Version, activeTheme.Theme);
             vsToolStripExtender.SetStyle(ConnectionTree.ContextMenuStrip, activeTheme.Version,
                 activeTheme.Theme);
 
             if (!_themeManager.ActiveAndExtended)
                 return;
 
-            // connection search area
-            searchBoxLayoutPanel.BackColor = activeTheme.ExtendedPalette.getColor("Dialog_Background");
-            searchBoxLayoutPanel.ForeColor = activeTheme.ExtendedPalette.getColor("Dialog_Foreground");
-            txtSearch.BackColor = activeTheme.ExtendedPalette.getColor("TextBox_Background");
-            txtSearch.ForeColor = activeTheme.ExtendedPalette.getColor("TextBox_Foreground");
-            //Picturebox needs to be manually themed
-            pbSearch.BackColor = activeTheme.ExtendedPalette.getColor("TreeView_Background");
+            // flat header strip on the panel background (the favorites drop-down keeps the theme renderer)
+            Color panelBackground = activeTheme.ExtendedPalette.getColor("TreeView_Background");
+            msMain.Renderer = new SidebarToolStripRenderer(panelBackground);
+            msMain.BackColor = panelBackground;
+            BackColor = panelBackground;
         }
 
         #endregion
@@ -217,13 +253,11 @@ namespace mRemoteNG.UI.Window
                 if (_sortedAz)
                 {
                     ConnectionTree.SortRecursive(ConnectionTree.GetRootConnectionNode(), ListSortDirection.Ascending);
-                    mMenSort.Image = Properties.Resources.SortDescending_16x;
                     _sortedAz = false;
                 }
                 else
                 {
                     ConnectionTree.SortRecursive(ConnectionTree.GetRootConnectionNode(), ListSortDirection.Descending);
-                    mMenSort.Image = Properties.Resources.SortAscending_16x;
                     _sortedAz = true;
                 }
             };

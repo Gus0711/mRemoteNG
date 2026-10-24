@@ -13,6 +13,8 @@ using mRemoteNG.Properties;
 using mRemoteNG.Themes;
 using mRemoteNG.Tree.Root;
 using mRemoteNG.UI.Controls.ConnectionInfoPropertyGrid;
+using mRemoteNG.UI.Controls.ConnectionTree;
+using mRemoteNG.UI.GraphicsUtilities;
 using WeifenLuo.WinFormsUI.Docking;
 using mRemoteNG.Resources.Language;
 using System.Runtime.Versioning;
@@ -39,6 +41,25 @@ namespace mRemoteNG.UI.Window
         private ToolStripSeparator _toolStripSeparator1;
         private ConnectionInfoPropertyGrid _pGrid;
         private ThemeManager _themeManager;
+        private ToolStrip _propertyGridToolStrip;
+        private HostStatus _hostStatus = HostStatus.Checking;
+
+        private enum HostStatus
+        {
+            Checking,
+            Online,
+            Offline
+        }
+
+        // Segoe Fluent Icons code points for the toolbar.
+        private const char GlyphCategorized = '\uE8A9';
+        private const char GlyphAlphabetical = '\uE8CB';
+        private const char GlyphProperties = '\uE713';
+        private const char GlyphInheritance = '\uE71B';
+        private const char GlyphDefaultProperties = '\uE90F';
+        private const char GlyphDefaultInheritance = '\uE8F1';
+        private const char GlyphStatusChecking = '\uE895';
+        private const char GlyphStatusDot = '\uF136';
 
         private ConnectionInfo _selectedTreeNode;
 
@@ -96,7 +117,7 @@ namespace mRemoteNG.UI.Window
             _pGrid.Name = "_pGrid";
             _pGrid.PropertySort = PropertySort.Categorized;
             _pGrid.TabIndex = 0;
-            _pGrid.UseCompatibleTextRendering = true;
+            _pGrid.UseCompatibleTextRendering = false;
             //
             //propertyGridContextMenu
             //
@@ -305,21 +326,106 @@ namespace mRemoteNG.UI.Window
 
         private new void ApplyTheme()
         {
-            if (!ThemeManager.getInstance().ActiveAndExtended) return;
-            _pGrid.BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Background");
-            _pGrid.ForeColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Foreground");
-            _pGrid.ViewBackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("List_Item_Background");
-            _pGrid.ViewForeColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("List_Item_Foreground");
-            _pGrid.LineColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("List_Item_Border");
-            _pGrid.HelpBackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Background");
-            _pGrid.HelpForeColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Foreground");
-            _pGrid.CategoryForeColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("List_Header_Foreground");
-            _pGrid.CommandsDisabledLinkColor =
-                _themeManager.ActiveTheme.ExtendedPalette.getColor("List_Item_Disabled_Foreground");
-            _pGrid.CommandsBackColor =
-                _themeManager.ActiveTheme.ExtendedPalette.getColor("List_Item_Disabled_Background");
-            _pGrid.CommandsForeColor =
-                _themeManager.ActiveTheme.ExtendedPalette.getColor("List_Item_Disabled_Foreground");
+            _themeManager ??= ThemeManager.getInstance();
+            if (!_themeManager.ActiveAndExtended) return;
+
+            // Flat property grid on the panel background: subtle category bands and row lines,
+            // secondary-colored category titles and the selection color of the modern palette.
+            ModernPalette palette = ModernPalette.Current;
+            Color background = _themeManager.ActiveTheme.ExtendedPalette.getColor("TreeView_Background");
+            BackColor = background;
+            _pGrid.BackColor = background;
+            _pGrid.ForeColor = palette.Text;
+            _pGrid.ViewBackColor = background;
+            _pGrid.ViewForeColor = palette.Text;
+            _pGrid.ViewBorderColor = background;
+            _pGrid.LineColor = palette.BorderSubtle;
+            _pGrid.CategorySplitterColor = palette.BorderSubtle;
+            _pGrid.CategoryForeColor = palette.TextSecondary;
+            _pGrid.SelectedItemWithFocusBackColor = palette.Selection;
+            _pGrid.SelectedItemWithFocusForeColor = palette.Text;
+            _pGrid.DisabledItemForeColor = palette.TextDisabled;
+            _pGrid.HelpBackColor = background;
+            _pGrid.HelpForeColor = palette.TextSecondary;
+            _pGrid.HelpBorderColor = palette.BorderSubtle;
+            _pGrid.CommandsBackColor = background;
+            _pGrid.CommandsForeColor = palette.Text;
+            _pGrid.CommandsBorderColor = palette.BorderSubtle;
+            _pGrid.CommandsLinkColor = palette.Accent;
+            _pGrid.CommandsActiveLinkColor = palette.AccentHover;
+            _pGrid.CommandsDisabledLinkColor = palette.TextDisabled;
+            StyleToolStrip();
+        }
+
+        /// <summary>
+        /// Flat toolbar with Fluent glyphs; the active view is tinted with the accent color.
+        /// </summary>
+        private void StyleToolStrip()
+        {
+            if (_propertyGridToolStrip == null || _themeManager == null || !_themeManager.ActiveAndExtended)
+                return;
+
+            Color background = _themeManager.ActiveTheme.ExtendedPalette.getColor("TreeView_Background");
+            _propertyGridToolStrip.Renderer = new SidebarToolStripRenderer(background);
+            _propertyGridToolStrip.BackColor = background;
+            _propertyGridToolStrip.GripStyle = ToolStripGripStyle.Hidden;
+            _propertyGridToolStrip.Padding = new Padding(ScaleLogical(6), ScaleLogical(4), ScaleLogical(6), ScaleLogical(4));
+
+            if (_propertyGridToolStrip.Items.Count > 1)
+            {
+                SetToolbarGlyph(_propertyGridToolStrip.Items[0], GlyphCategorized);
+                SetToolbarGlyph(_propertyGridToolStrip.Items[1], GlyphAlphabetical);
+            }
+
+            SetToolbarGlyph(_btnShowProperties, GlyphProperties);
+            SetToolbarGlyph(_btnShowInheritance, GlyphInheritance);
+            SetToolbarGlyph(_btnShowDefaultProperties, GlyphDefaultProperties);
+            SetToolbarGlyph(_btnShowDefaultInheritance, GlyphDefaultInheritance);
+            SizeToolbarButton(_btnHostStatus);
+            SizeToolbarButton(_btnIcon);
+            _btnHostStatus.Image = GetHostStatusImage(_hostStatus);
+        }
+
+        private int ScaleLogical(int logical) => (int)Math.Round(logical * DeviceDpi / 96f);
+
+        private void SetToolbarGlyph(ToolStripItem item, char glyph)
+        {
+            if (item is not ToolStripButton button) return;
+            ModernPalette palette = ModernPalette.Current;
+            Color color = button.Checked && button.Enabled ? palette.Accent : palette.TextSecondary;
+            button.Image = FluentIcons.Get(glyph, ScaleLogical(16), color);
+            button.DisplayStyle = ToolStripItemDisplayStyle.Image;
+            SizeToolbarButton(button);
+        }
+
+        private void SizeToolbarButton(ToolStripItem item)
+        {
+            item.ImageScaling = ToolStripItemImageScaling.None;
+            item.AutoSize = false;
+            item.Size = new Size(ScaleLogical(28), ScaleLogical(28));
+            item.Margin = new Padding(0, 0, ScaleLogical(2), 0);
+        }
+
+        /// <summary>Sync glyph while pinging, then a green (reachable) or red (unreachable) dot.</summary>
+        private Image GetHostStatusImage(HostStatus status)
+        {
+            if (_themeManager is not { ActiveAndExtended: true })
+            {
+                return status switch
+                {
+                    HostStatus.Online => Properties.Resources.HostStatus_On,
+                    HostStatus.Offline => Properties.Resources.HostStatus_Off,
+                    _ => Properties.Resources.HostStatus_Check
+                };
+            }
+
+            ModernPalette palette = ModernPalette.Current;
+            return status switch
+            {
+                HostStatus.Online => FluentIcons.Get(GlyphStatusDot, ScaleLogical(10), palette.Success),
+                HostStatus.Offline => FluentIcons.Get(GlyphStatusDot, ScaleLogical(10), palette.Danger),
+                _ => FluentIcons.Get(GlyphStatusChecking, ScaleLogical(14), palette.TextSecondary)
+            };
         }
 
         private void UpdateTopRow()
@@ -340,6 +446,7 @@ namespace mRemoteNG.UI.Window
                 UpdateShowDefaultInheritanceButton();
                 UpdateHostStatusButton();
                 UpdateIconButton();
+                StyleToolStrip();
             }
             catch (Exception ex)
             {
@@ -433,6 +540,8 @@ namespace mRemoteNG.UI.Window
                     return;
                 }
 
+                _propertyGridToolStrip = propertyGridToolStrip;
+
                 if (!_originalPropertyGridToolStripItemCountValid)
                 {
                     _originalPropertyGridToolStripItemCount = propertyGridToolStrip.Items.Count;
@@ -445,9 +554,13 @@ namespace mRemoteNG.UI.Window
                 propertyGridToolStrip.Items[_originalPropertyGridToolStripItemCount - 1].Visible = false;
 
                 int expectedToolStripItemCount = _originalPropertyGridToolStripItemCount + customToolStrip.Items.Count;
-                if (propertyGridToolStrip.Items.Count == expectedToolStripItemCount) return;
-                propertyGridToolStrip.AllowMerge = true;
-                ToolStripManager.Merge(customToolStrip, propertyGridToolStrip);
+                if (propertyGridToolStrip.Items.Count != expectedToolStripItemCount)
+                {
+                    propertyGridToolStrip.AllowMerge = true;
+                    ToolStripManager.Merge(customToolStrip, propertyGridToolStrip);
+                }
+
+                StyleToolStrip();
             }
             catch (Exception ex)
             {
@@ -461,6 +574,7 @@ namespace mRemoteNG.UI.Window
         {
             _themeManager = ThemeManager.getInstance();
             _themeManager.ThemeChanged += ApplyTheme;
+            _pGrid.Font = SidebarFonts.Regular;
             ApplyTheme();
             AddToolStripItems();
             _pGrid.HelpVisible = Settings.Default.ShowConfigHelpText;
@@ -591,7 +705,7 @@ namespace mRemoteNG.UI.Window
         {
             if (string.IsNullOrEmpty(hostName as string))
             {
-                ShowStatusImage(Properties.Resources.HostStatus_Off);
+                ShowHostStatus(HostStatus.Offline);
                 return;
             }
 
@@ -604,7 +718,7 @@ namespace mRemoteNG.UI.Window
                 {
                     if ((string)_btnHostStatus.Tag == "checking")
                     {
-                        ShowStatusImage(Properties.Resources.HostStatus_On);
+                        ShowHostStatus(HostStatus.Online);
                     }
                         
                 }
@@ -612,7 +726,7 @@ namespace mRemoteNG.UI.Window
                 {
                     if ((string)_btnHostStatus.Tag == "checking")
                     {
-                        ShowStatusImage(Properties.Resources.HostStatus_Off);
+                        ShowHostStatus(HostStatus.Offline);
                     }
                         
                 }
@@ -621,24 +735,22 @@ namespace mRemoteNG.UI.Window
             {
                 if ((string)_btnHostStatus.Tag == "checking")
                 {
-                    ShowStatusImage(Properties.Resources.HostStatus_Off);
+                    ShowHostStatus(HostStatus.Offline);
                 }
                    
             }
         }
 
-        private delegate void ShowStatusImageCb(Image image);
-
-        private void ShowStatusImage(Image image)
+        private void ShowHostStatus(HostStatus status)
         {
             if (_pGrid.InvokeRequired)
             {
-                ShowStatusImageCb d = ShowStatusImage;
-                _pGrid.Invoke(d, image);
+                _pGrid.Invoke(() => ShowHostStatus(status));
             }
             else
             {
-                _btnHostStatus.Image = image;
+                _hostStatus = status;
+                _btnHostStatus.Image = GetHostStatusImage(status);
                 _btnHostStatus.Tag = "checkfinished";
             }
         }
@@ -647,7 +759,8 @@ namespace mRemoteNG.UI.Window
         {
             try
             {
-                _btnHostStatus.Image = Properties.Resources.HostStatus_Check;
+                _hostStatus = HostStatus.Checking;
+                _btnHostStatus.Image = GetHostStatusImage(HostStatus.Checking);
                 // To check status, ConnectionInfo must be an mRemoteNG.Connection.Info that is not a container
                 if (connectionInfo is not ConnectionInfo info) return;
                 if (info.IsContainer) return;

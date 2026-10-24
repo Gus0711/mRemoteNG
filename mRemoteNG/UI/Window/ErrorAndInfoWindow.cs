@@ -9,6 +9,8 @@ using mRemoteNG.App;
 using mRemoteNG.Messages;
 using mRemoteNG.UI.Forms;
 using mRemoteNG.Themes;
+using mRemoteNG.UI.Controls.ConnectionTree;
+using mRemoteNG.UI.GraphicsUtilities;
 using mRemoteNG.Resources.Language;
 using Message = mRemoteNG.Messages.Message;
 using System.Runtime.Versioning;
@@ -41,6 +43,7 @@ namespace mRemoteNG.UI.Window
             _themeManager.ThemeChanged += ApplyTheme;
             LayoutVertical();
             FillImageList();
+            SetupModernList();
             ApplyLanguage();
         }
 
@@ -67,7 +70,15 @@ namespace mRemoteNG.UI.Window
 
         private new void ApplyTheme()
         {
+            if (lvErrorCollector.IsHandleCreated)
+                NativeScrollBarTheme.Apply(lvErrorCollector);
             if (!_themeManager.ActiveAndExtended) return;
+            if (UseModernStyle)
+            {
+                ApplyModernTheme();
+                return;
+            }
+
             lvErrorCollector.BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Background");
             lvErrorCollector.ForeColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Foreground");
 
@@ -81,12 +92,167 @@ namespace mRemoteNG.UI.Window
 
         private void FillImageList()
         {
-            imgListMC.ImageSize = _display.ScaleSize(imgListMC.ImageSize);
-            imgListMC.Images.Add(_display.ScaleImage(Properties.Resources.Test_16x));
-            imgListMC.Images.Add(_display.ScaleImage(Properties.Resources.StatusInformation_16x));
-            imgListMC.Images.Add(_display.ScaleImage(Properties.Resources.LogWarning_16x));
-            imgListMC.Images.Add(_display.ScaleImage(Properties.Resources.LogError_16x));
+            // The images only reserve the row height: rows are owner drawn with severity glyphs.
+            imgListMC.ImageSize = new Size(1, _display.ScaleHeight(ModernRowHeight));
+            for (int i = 0; i < 4; i++)
+                imgListMC.Images.Add(new Bitmap(1, imgListMC.ImageSize.Height));
         }
+
+        #region Modern list
+
+        private const int ModernRowHeight = 30;
+
+        // Segoe Fluent Icons code points of the severity badges.
+        private const char GlyphDebug = '\uE9D9';
+        private const char GlyphInfo = '\uF167';
+        private const char GlyphWarning = '\uE814';
+        private const char GlyphError = '\uEB90';
+
+        private int _hotIndex = -1;
+
+        private bool UseModernStyle => _themeManager.ActiveAndExtended;
+
+        private void SetupModernList()
+        {
+            lvErrorCollector.OwnerDraw = true;
+            lvErrorCollector.DrawItem += LvErrorCollector_DrawItem;
+            lvErrorCollector.DrawSubItem += (_, e) => e.DrawDefault = false;
+            lvErrorCollector.DrawColumnHeader += (_, e) => e.DrawDefault = true;
+            lvErrorCollector.MouseMove += LvErrorCollector_MouseMove;
+            lvErrorCollector.MouseLeave += (_, _) => SetHotIndex(-1);
+            lvErrorCollector.HandleCreated += (_, _) => NativeScrollBarTheme.Apply(lvErrorCollector);
+            lvErrorCollector.Font = SidebarFonts.Regular;
+            txtMsgText.Font = SidebarFonts.Regular;
+            lblMsgDate.Font = SidebarFonts.Small;
+            // MrngTextBox / MrngLabel apply the legacy dialog colors when their handle is created,
+            // so re-apply the flat colors right after that.
+            txtMsgText.HandleCreated += (_, _) => ReapplyModernThemeLater(txtMsgText);
+            lblMsgDate.HandleCreated += (_, _) => ReapplyModernThemeLater(lblMsgDate);
+            pbError.HandleCreated += (_, _) => ReapplyModernThemeLater(pbError);
+        }
+
+        private void ReapplyModernThemeLater(Control control)
+        {
+            NativeScrollBarTheme.Apply(control);
+            control.BeginInvoke(() =>
+            {
+                if (IsDisposed || !UseModernStyle) return;
+                if (lvErrorCollector.SelectedItems.Count == 1 && lvErrorCollector.SelectedItems[0].Tag is IMessage message)
+                    ShowModernMessageDetails(message);
+                else
+                    ApplyModernTheme();
+            });
+        }
+
+        private void ApplyModernTheme()
+        {
+            ModernPalette palette = ModernPalette.Current;
+            Color background = _themeManager.ActiveTheme.ExtendedPalette.getColor("TreeView_Background");
+            BackColor = background;
+            lvErrorCollector.BackColor = background;
+            lvErrorCollector.ForeColor = palette.Text;
+            pnlErrorMsg.BackColor = background;
+            pnlErrorMsg.ForeColor = palette.Text;
+            txtMsgText.BackColor = background;
+            txtMsgText.ForeColor = palette.Text;
+            lblMsgDate.BackColor = background;
+            lblMsgDate.ForeColor = palette.TextSecondary;
+            pbError.BackColor = background;
+            NativeScrollBarTheme.Apply(txtMsgText);
+            lvErrorCollector.Invalidate();
+            if (lvErrorCollector.SelectedItems.Count == 1)
+                lvErrorCollector_SelectedIndexChanged(lvErrorCollector, EventArgs.Empty);
+        }
+
+        private static (char Glyph, Color Color) GetSeverityStyle(MessageClass messageClass, ModernPalette palette) =>
+            messageClass switch
+            {
+                MessageClass.ErrorMsg => (GlyphError, palette.Danger),
+                MessageClass.WarningMsg => (GlyphWarning, palette.Warning),
+                MessageClass.InformationMsg => (GlyphInfo, palette.Accent),
+                _ => (GlyphDebug, palette.TextSecondary)
+            };
+
+        private void LvErrorCollector_MouseMove(object sender, MouseEventArgs e)
+        {
+            ListViewItem item = lvErrorCollector.GetItemAt(e.X, e.Y);
+            SetHotIndex(item?.Index ?? -1);
+        }
+
+        private void SetHotIndex(int index)
+        {
+            if (index == _hotIndex) return;
+            int previous = _hotIndex;
+            _hotIndex = index;
+            if (previous >= 0 && previous < lvErrorCollector.Items.Count)
+                lvErrorCollector.Invalidate(lvErrorCollector.Items[previous].Bounds);
+            if (index >= 0 && index < lvErrorCollector.Items.Count)
+                lvErrorCollector.Invalidate(lvErrorCollector.Items[index].Bounds);
+        }
+
+        private void LvErrorCollector_DrawItem(object sender, DrawListViewItemEventArgs e)
+        {
+            if (!UseModernStyle)
+            {
+                e.DrawDefault = true;
+                return;
+            }
+
+            Graphics g = e.Graphics;
+            ModernPalette palette = ModernPalette.Current;
+            int Scale(int v) => (int)Math.Round(v * lvErrorCollector.DeviceDpi / 96f);
+
+            Rectangle bounds = new(0, e.Bounds.Y, Math.Min(e.Bounds.Right, lvErrorCollector.ClientSize.Width), e.Bounds.Height);
+            using (SolidBrush back = new(lvErrorCollector.BackColor))
+                g.FillRectangle(back, bounds);
+
+            Rectangle row = Rectangle.Inflate(bounds, -Scale(6), -Scale(1));
+            float radius = Scale(ModernPalette.CornerRadius) - 1;
+            if (e.Item.Selected)
+                ModernGraphics.FillRoundedRectangle(g, lvErrorCollector.Focused ? palette.Selection : ModernGraphics.Blend(palette.Selection, lvErrorCollector.BackColor, 0.45f), row, radius);
+            else if (e.ItemIndex == _hotIndex)
+                ModernGraphics.FillRoundedRectangle(g, palette.SurfaceHover, row, radius);
+
+            if (e.Item.Tag is not IMessage message)
+                return;
+
+            (char glyph, Color color) = GetSeverityStyle(message.Class, palette);
+            Rectangle glyphBounds = new(row.X + Scale(8), row.Y, Scale(18), row.Height);
+            FluentIcons.Draw(g, glyph, glyphBounds, color, Scale(14));
+
+            string time = message.Date.ToString("HH:mm:ss", CultureInfo.CurrentCulture);
+            Font font = lvErrorCollector.Font;
+            const TextFormatFlags flags = TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine |
+                                          TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding;
+            int timeWidth = TextRenderer.MeasureText(g, time, font, Size.Empty, flags).Width;
+            Rectangle timeBounds = new(row.Right - timeWidth - Scale(12), row.Y, timeWidth + Scale(2), row.Height);
+            TextRenderer.DrawText(g, time, font, timeBounds, palette.TextSecondary, flags | TextFormatFlags.Right);
+
+            string text = message.Text ?? string.Empty;
+            int lineBreak = text.IndexOfAny(new[] { '\r', '\n' });
+            if (lineBreak >= 0)
+                text = text.Substring(0, lineBreak);
+            int textLeft = glyphBounds.Right + Scale(8);
+            Rectangle textBounds = new(textLeft, row.Y, Math.Max(0, timeBounds.Left - Scale(12) - textLeft), row.Height);
+            TextRenderer.DrawText(g, text, font, textBounds, palette.Text, flags | TextFormatFlags.EndEllipsis);
+        }
+
+        private void ShowModernMessageDetails(IMessage message)
+        {
+            ModernPalette palette = ModernPalette.Current;
+            (char glyph, Color color) = GetSeverityStyle(message.Class, palette);
+            pbError.Image = FluentIcons.Get(glyph, _display.ScaleHeight(22), color);
+            Color background = _themeManager.ActiveTheme.ExtendedPalette.getColor("TreeView_Background");
+            pnlErrorMsg.BackColor = background;
+            pnlErrorMsg.ForeColor = palette.Text;
+            txtMsgText.BackColor = background;
+            txtMsgText.ForeColor = palette.Text;
+            lblMsgDate.BackColor = background;
+            lblMsgDate.ForeColor = palette.TextSecondary;
+            pbError.BackColor = background;
+        }
+
+        #endregion
 
         private void LayoutVertical()
         {
@@ -168,12 +334,18 @@ namespace mRemoteNG.UI.Window
         {
             try
             {
-                pnlErrorMsg.BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("Dialog_Background");
                 pbError.Image = null;
-                txtMsgText.BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Background");
                 txtMsgText.Text = "";
-                lblMsgDate.BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("Dialog_Background");
                 lblMsgDate.Text = "";
+                if (UseModernStyle)
+                {
+                    ApplyModernTheme();
+                    return;
+                }
+
+                pnlErrorMsg.BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("Dialog_Background");
+                txtMsgText.BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Background");
+                lblMsgDate.BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("Dialog_Background");
             }
             catch (Exception ex)
             {
@@ -221,6 +393,14 @@ namespace mRemoteNG.UI.Window
 
                 ListViewItem sItem = lvErrorCollector.SelectedItems[0];
                 Message eMsg = (Message)sItem.Tag;
+                if (UseModernStyle)
+                {
+                    ShowModernMessageDetails(eMsg);
+                    lblMsgDate.Text = eMsg.Date.ToString(CultureInfo.InvariantCulture);
+                    txtMsgText.Text = eMsg.Text;
+                    return;
+                }
+
                 switch (eMsg.Class)
                 {
                     case MessageClass.DebugMsg:

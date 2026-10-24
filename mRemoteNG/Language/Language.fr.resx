@@ -1608,7 +1608,7 @@ Nécessite RCD 8.0 ou postérieur.</value>
     <value>Captures d'écran</value>
   </data>
   <data name="SearchPrompt" xml:space="preserve">
-    <value>Invite de recherche</value>
+    <value>Rechercher…</value>
   </data>
   <data name="SendTo" xml:space="preserve">
     <value>Envoyer à...</value>

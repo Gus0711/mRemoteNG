@@ -100,6 +100,7 @@ namespace mRemoteNG.UI.Controls.ConnectionTree
             InitializeComponent();
             SetupConnectionTreeView();
             UseOverlays = false;
+            SetupModernAppearance();
             _themeManager = ThemeManager.getInstance();
             _themeManager.ThemeChanged += ThemeManagerOnThemeChanged;
             ApplyTheme();
@@ -109,6 +110,58 @@ namespace mRemoteNG.UI.Controls.ConnectionTree
         private void ThemeManagerOnThemeChanged()
         {
             ApplyTheme();
+            NativeScrollBarTheme.Apply(this);
+            Invalidate();
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            NativeScrollBarTheme.Apply(this);
+        }
+
+        /// <summary>
+        /// Sidebar look: custom row renderer (chevrons, protocol glyphs, rounded highlights),
+        /// taller rows and hot tracking for the hover highlight.
+        /// </summary>
+        private void SetupModernAppearance()
+        {
+            TreeColumnRenderer = new ConnectionTreeRenderer();
+            FullRowSelect = true;
+            UseHotControls = true;
+            ApplyRowHeight();
+        }
+
+        private void ApplyRowHeight()
+        {
+            RowHeight = (int)Math.Round(ConnectionTreeRenderer.RowHeightLogical * DeviceDpi / 96f);
+        }
+
+        protected override void OnDpiChangedAfterParent(EventArgs e)
+        {
+            base.OnDpiChangedAfterParent(e);
+            ApplyRowHeight();
+            AutoResizeColumn(Columns[0]);
+        }
+
+        protected override void OnClientSizeChanged(EventArgs e)
+        {
+            base.OnClientSizeChanged(e);
+            if (Columns.Count > 0 && IsHandleCreated)
+                AutoResizeColumn(Columns[0]);
+        }
+
+        protected override void OnGotFocus(EventArgs e)
+        {
+            base.OnGotFocus(e);
+            // the selection highlight is dimmed while the tree is not focused
+            Invalidate();
+        }
+
+        protected override void OnLostFocus(EventArgs e)
+        {
+            base.OnLostFocus(e);
+            Invalidate();
         }
 
         private void ApplyTheme()
@@ -264,7 +317,6 @@ namespace mRemoteNG.UI.Controls.ConnectionTree
             ModelDropped += _dragAndDropHandler.HandleEvent_ModelDropped;
             BeforeLabelEdit += OnBeforeLabelEdit;
             AfterLabelEdit += OnAfterLabelEdit;
-            FormatCell += ConnectionTree_FormatCell;
         }
 
         /// <summary>
@@ -449,19 +501,21 @@ namespace mRemoteNG.UI.Controls.ConnectionTree
                 return;
             }
 
-            int longestIndentationAndTextWidth = int.MinValue;
-            int horizontalScrollOffset = LowLevelScrollPosition.X;
-            const int padding = 10;
+            // Rows are drawn full width (rounded hover/selection), so the column fills the
+            // visible area and only grows past it (horizontal scroll) when a label needs it.
+            int longestRowWidth = 0;
 
-            for (int i = 0; i < Items.Count; i++)
+            for (int i = 0; i < GetItemCount(); i++)
             {
-                int rowIndentation = Items[i].Position.X;
-                int rowTextWidth = TextRenderer.MeasureText(Items[i].Text, Font).Width;
-
-                longestIndentationAndTextWidth = Math.Max(rowIndentation + rowTextWidth, longestIndentationAndTextWidth);
+                object model = GetModelObject(i);
+                if (model is not ConnectionInfo node) continue;
+                int level = TreeModel.GetBranch(model)?.Level ?? 1;
+                longestRowWidth = Math.Max(longestRowWidth, ConnectionTreeRenderer.MeasureRowWidth(this, Font, node.Name, level));
             }
 
-            column.Width = longestIndentationAndTextWidth + SmallImageSize.Width + horizontalScrollOffset + padding;
+            int newWidth = Math.Max(longestRowWidth, ClientSize.Width);
+            if (column.Width != newWidth)
+                column.Width = newWidth;
         }
 
         private void PopulateTreeView(ConnectionTreeModel newModel)
@@ -525,7 +579,9 @@ namespace mRemoteNG.UI.Controls.ConnectionTree
 
             if (property != nameof(ConnectionInfo.Name)
              && property != nameof(ConnectionInfo.OpenConnections)
-             && property != nameof(ConnectionInfo.Icon))
+             && property != nameof(ConnectionInfo.Icon)
+             && property != nameof(ConnectionInfo.Protocol)
+             && property != nameof(ConnectionInfo.Color))
             {
                 return;
             }
@@ -534,6 +590,8 @@ namespace mRemoteNG.UI.Controls.ConnectionTree
                 return;
 
             RefreshObject(senderAsConnectionInfo);
+            if (property == nameof(ConnectionInfo.Color))
+                Invalidate(); // children inherit the color of their folder
             AutoResizeColumn(Columns[0]);
         }
 
@@ -956,27 +1014,6 @@ namespace mRemoteNG.UI.Controls.ConnectionTree
 
             _nodeInEditMode = true;
             _contextMenu.DisableShortcutKeys();
-        }
-
-        private void ConnectionTree_FormatCell(object sender, FormatCellEventArgs e)
-        {
-            if (e.Model is not ConnectionInfo connectionInfo)
-                return;
-
-            string colorString = connectionInfo.Color;
-            if (string.IsNullOrEmpty(colorString))
-                return;
-
-            try
-            {
-                System.Drawing.ColorConverter converter = new();
-                System.Drawing.Color color = (System.Drawing.Color)converter.ConvertFromString(colorString);
-                e.SubItem.ForeColor = color;
-            }
-            catch
-            {
-                // If color parsing fails, just ignore and use default color
-            }
         }
 
         private void OnAfterLabelEdit(object sender, LabelEditEventArgs e)

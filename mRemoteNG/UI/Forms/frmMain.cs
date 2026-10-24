@@ -220,6 +220,8 @@ namespace mRemoteNG.UI.Forms
  
             SetMenuDependencies();
 
+            // the default layout (no pnlLayout.xml yet) already adds the General panel to the window list
+            Runtime.WindowList ??= [];
             DockPanelLayoutLoader uiLoader = new(this, messageCollector);
             uiLoader.LoadPanelsFromXml();
 
@@ -231,7 +233,7 @@ namespace mRemoteNG.UI.Forms
 
             _fpChainedWindowHandle = NativeMethods.SetClipboardViewer(Handle);
 
-            Runtime.WindowList = [];
+            Runtime.WindowList ??= [];
 
             if (Properties.App.Default.ResetPanels)
                 SetDefaultLayout();
@@ -935,8 +937,9 @@ namespace mRemoteNG.UI.Forms
             pnlDock.Visible = false;
 
             AppWindows.TreeForm.Show(pnlDock, DockState.DockLeft);
-            AppWindows.ConfigForm.Show(pnlDock, DockState.DockLeft);
-            AppWindows.ConfigForm.Activate();
+            // connection tree on top, its properties underneath, both visible
+            AppWindows.ConfigForm.Show(AppWindows.TreeForm.Pane, DockAlignment.Bottom, 0.45);
+            AppWindows.TreeForm.Activate();
             AppWindows.ErrorsForm.Show(pnlDock, DockState.DockBottomAutoHide);
             viewMenu._mMenViewErrorsAndInfos.Checked = true;
 
