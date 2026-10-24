@@ -69,7 +69,7 @@ namespace mRemoteNG.Themes
             MremoteNGPaletteManipulator extColorLoader = new(bytes, defaultTheme?.ExtendedPalette);
             ThemeInfo loadedTheme = new(Path.GetFileNameWithoutExtension(filename), themeBaseLoad, filename,
                                             VisualStudioToolStripExtender.VsVersion.Vs2015, extColorLoader.getColors());
-            if (new[] {"darcula", "vs2015blue", "vs2015dark", "vs2015light"}.Contains(
+            if (new[] {"darcula", "vs2015blue", "vs2015dark", "vs2015light", "ModernDark", "ModernLight"}.Contains(
                                                                                       Path
                                                                                           .GetFileNameWithoutExtension(filename))
             )

@@ -48,6 +48,7 @@ namespace mRemoteNG.Themes
 
             themePath = ResolveThemePath();
             LoadThemes();
+            MigrateToModernTheme();
             SetActive();
             _themeActive = true;
         }
@@ -72,6 +73,18 @@ namespace mRemoteNG.Themes
             {
                 return null;
             }
+        }
+
+        // Switch existing and new profiles to the modern dark theme once; later choices are kept.
+        private void MigrateToModernTheme()
+        {
+            if (Properties.OptionsThemePage.Default.ModernUiMigrated || !themes.ContainsKey(ModernDarkThemeName))
+                return;
+
+            Properties.OptionsThemePage.Default.ThemeName = ModernDarkThemeName;
+            Properties.OptionsThemePage.Default.ThemingActive = true;
+            Properties.OptionsThemePage.Default.ModernUiMigrated = true;
+            Properties.OptionsThemePage.Default.Save();
         }
 
         private void SetActive()
@@ -338,8 +351,11 @@ namespace mRemoteNG.Themes
             }
         }
 
+        public const string ModernDarkThemeName = "ModernDark";
+        public const string ModernLightThemeName = "ModernLight";
+
         public ThemeInfo DefaultTheme =>
-            (themes != null && ThemesCount > 0 ? themes["vs2015Light"] as ThemeInfo : null)
+            (themes != null && ThemesCount > 0 ? (themes[ModernDarkThemeName] ?? themes["vs2015Light"]) as ThemeInfo : null)
             ?? new ThemeInfo("vs2015Light", new VS2015LightTheme(), "",
                              VisualStudioToolStripExtender.VsVersion.Vs2015);
 
@@ -402,6 +418,11 @@ namespace mRemoteNG.Themes
                 return;
 
             NativeMethods.UseImmersiveDarkMode(form.Handle, IsActiveThemeDark);
+
+            // Windows 11: rounded corners and a title bar that blends with the menu/toolbar chrome.
+            NativeMethods.SetWindowCornerPreference(form.Handle, NativeMethods.WindowCornerPreference.Round);
+            ModernPalette palette = ModernPalette.Current;
+            NativeMethods.SetCaptionColors(form.Handle, palette.Chrome, palette.Text, palette.Border);
         }
 
         public int ThemesCount => themes.Count;

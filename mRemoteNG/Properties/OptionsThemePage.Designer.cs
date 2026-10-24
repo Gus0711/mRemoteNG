@@ -70,5 +70,17 @@ namespace mRemoteNG.Properties {
                 this["IsActiveThemeDark"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool ModernUiMigrated {
+            get {
+                return ((bool)(this["ModernUiMigrated"]));
+            }
+            set {
+                this["ModernUiMigrated"] = value;
+            }
+        }
     }
 }

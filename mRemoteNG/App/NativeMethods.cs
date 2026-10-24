@@ -148,6 +148,46 @@ namespace mRemoteNG.App
             return DwmSetWindowAttribute(handle, 19, ref useDark, sizeof(int)) == 0;
         }
 
+        // Windows 11 (build 22000+) DWM attributes; older systems simply reject them.
+        private const int DWMWA_WINDOW_CORNER_PREFERENCE = 33;
+        private const int DWMWA_BORDER_COLOR = 34;
+        private const int DWMWA_CAPTION_COLOR = 35;
+        private const int DWMWA_TEXT_COLOR = 36;
+
+        internal enum WindowCornerPreference
+        {
+            Default = 0,
+            DoNotRound = 1,
+            Round = 2,
+            RoundSmall = 3
+        }
+
+        internal static bool SetWindowCornerPreference(IntPtr handle, WindowCornerPreference preference)
+        {
+            if (handle == IntPtr.Zero)
+                return false;
+
+            int value = (int)preference;
+            return DwmSetWindowAttribute(handle, DWMWA_WINDOW_CORNER_PREFERENCE, ref value, sizeof(int)) == 0;
+        }
+
+        // Colors the native title bar so it blends with the client area chrome.
+        internal static bool SetCaptionColors(IntPtr handle, Color caption, Color text, Color border)
+        {
+            if (handle == IntPtr.Zero)
+                return false;
+
+            int captionRef = ToColorRef(caption);
+            int textRef = ToColorRef(text);
+            int borderRef = ToColorRef(border);
+            bool ok = DwmSetWindowAttribute(handle, DWMWA_CAPTION_COLOR, ref captionRef, sizeof(int)) == 0;
+            DwmSetWindowAttribute(handle, DWMWA_TEXT_COLOR, ref textRef, sizeof(int));
+            DwmSetWindowAttribute(handle, DWMWA_BORDER_COLOR, ref borderRef, sizeof(int));
+            return ok;
+        }
+
+        private static int ToColorRef(Color color) => color.R | (color.G << 8) | (color.B << 16);
+
         #endregion
 
         #region Structures
