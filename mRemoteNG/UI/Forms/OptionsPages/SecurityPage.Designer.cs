@@ -32,10 +32,10 @@ namespace mRemoteNG.UI.Forms.OptionsPages
         private void InitializeComponent()
         {
             chkEncryptCompleteFile = new MrngCheckBox();
-            comboBoxEncryptionEngine = new ComboBox();
+            comboBoxEncryptionEngine = new mRemoteNG.UI.Controls.MrngComboBox();
             labelEncryptionEngine = new MrngLabel();
             labelBlockCipher = new MrngLabel();
-            comboBoxBlockCipher = new ComboBox();
+            comboBoxBlockCipher = new mRemoteNG.UI.Controls.MrngComboBox();
             groupAdvancedSecurityOptions = new MrngGroupBox();
             tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             labelKdfIterations = new MrngLabel();
@@ -43,10 +43,10 @@ namespace mRemoteNG.UI.Forms.OptionsPages
             btnTestSettings = new MrngButton();
             lblRegistrySettingsUsedInfo = new System.Windows.Forms.Label();
             pnlOptions = new System.Windows.Forms.Panel();
-            groupPasswordGenerator = new System.Windows.Forms.GroupBox();
+            groupPasswordGenerator = new mRemoteNG.UI.Controls.MrngGroupBox();
             pnlPasswordTxtAndBtn = new System.Windows.Forms.TableLayoutPanel();
-            txtPasswdGenerator = new System.Windows.Forms.TextBox();
-            btnPasswdGenerator = new System.Windows.Forms.Button();
+            txtPasswdGenerator = new mRemoteNG.UI.Controls.MrngTextBox();
+            btnPasswdGenerator = new mRemoteNG.UI.Controls.MrngButton();
             lblPasswdGenDescription = new System.Windows.Forms.Label();
             groupAdvancedSecurityOptions.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
@@ -310,10 +310,10 @@ namespace mRemoteNG.UI.Forms.OptionsPages
         #endregion
 
         internal MrngCheckBox chkEncryptCompleteFile;
-        private ComboBox comboBoxEncryptionEngine;
+        private mRemoteNG.UI.Controls.MrngComboBox comboBoxEncryptionEngine;
         private Controls.MrngLabel labelEncryptionEngine;
         private Controls.MrngLabel labelBlockCipher;
-        private ComboBox comboBoxBlockCipher;
+        private mRemoteNG.UI.Controls.MrngComboBox comboBoxBlockCipher;
         private MrngGroupBox groupAdvancedSecurityOptions;
         internal Controls.MrngNumericUpDown numberBoxKdfIterations;
         private Controls.MrngLabel labelKdfIterations;
@@ -321,10 +321,10 @@ namespace mRemoteNG.UI.Forms.OptionsPages
         private MrngButton btnTestSettings;
         internal System.Windows.Forms.Label lblRegistrySettingsUsedInfo;
         private System.Windows.Forms.Panel pnlOptions;
-        private System.Windows.Forms.GroupBox groupPasswordGenerator;
+        private mRemoteNG.UI.Controls.MrngGroupBox groupPasswordGenerator;
         private System.Windows.Forms.TableLayoutPanel pnlPasswordTxtAndBtn;
-        private System.Windows.Forms.TextBox txtPasswdGenerator;
-        private System.Windows.Forms.Button btnPasswdGenerator;
+        private mRemoteNG.UI.Controls.MrngTextBox txtPasswdGenerator;
+        private mRemoteNG.UI.Controls.MrngButton btnPasswdGenerator;
         private System.Windows.Forms.Label lblPasswdGenDescription;
     }
 }

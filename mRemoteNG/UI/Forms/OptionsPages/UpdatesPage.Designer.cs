@@ -36,11 +36,11 @@ namespace mRemoteNG.UI.Forms.OptionsPages
         {
             lblUpdatesExplanation = new MrngLabel();
             pnlUpdateCheck = new System.Windows.Forms.Panel();
-            cboUpdateCheckFrequency = new ComboBox();
+            cboUpdateCheckFrequency = new mRemoteNG.UI.Controls.MrngComboBox();
             btnUpdateCheckNow = new MrngButton();
             chkCheckForUpdatesOnStartup = new MrngCheckBox();
             lblReleaseChannelExplanation = new MrngTextBox();
-            cboReleaseChannel = new ComboBox();
+            cboReleaseChannel = new mRemoteNG.UI.Controls.MrngComboBox();
             pnlProxy = new System.Windows.Forms.Panel();
             tblProxyBasic = new System.Windows.Forms.TableLayoutPanel();
             numProxyPort = new MrngNumericUpDown();
@@ -394,13 +394,13 @@ namespace mRemoteNG.UI.Forms.OptionsPages
         internal Controls.MrngLabel lblProxyPassword;
         internal Controls.MrngTextBox txtProxyPassword;
         internal MrngButton btnTestProxy;
-        private ComboBox cboReleaseChannel;
+        private mRemoteNG.UI.Controls.MrngComboBox cboReleaseChannel;
         private Controls.MrngTextBox lblReleaseChannelExplanation;
         private MrngGroupBox groupBoxReleaseChannel;
         private System.Windows.Forms.TableLayoutPanel tblProxyBasic;
         private System.Windows.Forms.TableLayoutPanel tblProxyAuthentication;
         private System.Windows.Forms.Panel pnlDefaultUpdate;
         internal System.Windows.Forms.Label lblRegistrySettingsUsedInfo;
-        internal ComboBox cboUpdateCheckFrequency;
+        internal mRemoteNG.UI.Controls.MrngComboBox cboUpdateCheckFrequency;
     }
 }

@@ -36,7 +36,7 @@ namespace mRemoteNG.UI.Forms.OptionsPages
         private void InitializeComponent()
         {
             lblLanguageRestartRequired = new MrngLabel();
-            cboLanguage = new ComboBox();
+            cboLanguage = new mRemoteNG.UI.Controls.MrngComboBox();
             lblLanguage = new MrngLabel();
             chkShowFullConnectionsFilePathInTitle = new MrngCheckBox();
             chkShowDescriptionTooltipsInTree = new MrngCheckBox();
@@ -236,7 +236,7 @@ namespace mRemoteNG.UI.Forms.OptionsPages
         }
 
         internal Controls.MrngLabel lblLanguageRestartRequired;
-        internal ComboBox cboLanguage;
+        internal mRemoteNG.UI.Controls.MrngComboBox cboLanguage;
         internal Controls.MrngLabel lblLanguage;
         internal MrngCheckBox chkShowFullConnectionsFilePathInTitle;
         internal MrngCheckBox chkShowDescriptionTooltipsInTree;

@@ -358,7 +358,8 @@ namespace mRemoteNG.UI.Forms
         private void FitNavigationListHeight()
         {
             lstOptionPages.Dock = DockStyle.Top;
-            lstOptionPages.Height = lstOptionPages.Items.Count * (lstOptionPages.RowHeight + 1) + _display.ScaleHeight(4);
+            lstOptionPages.Scrollable = false; // never scroll (avoids stale row fragments); the nav panel scrolls instead
+            lstOptionPages.Height = lstOptionPages.Items.Count * (lstOptionPages.RowHeight + 1) + _display.ScaleHeight(6);
             pnlNav.AutoScroll = true;
             pnlNav.Invalidate(true);
         }
@@ -464,6 +465,7 @@ namespace mRemoteNG.UI.Forms
                 }
 
                 lblPageTitle.Text = page.PageName;
+                lstOptionPages.Invalidate();
                 pnlMain.SuspendLayout();
                 pnlMain.Controls.Clear();
                 Logger.Instance.Log?.Debug($"[LstOptionPages_SelectedIndexChanged] pnlMain.Controls cleared");
