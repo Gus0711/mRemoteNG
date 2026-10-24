@@ -4234,6 +4234,15 @@ namespace mRemoteNG.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Auto Hide.
+        /// </summary>
+        internal static string AutoHide {
+            get {
+                return ResourceManager.GetString("AutoHide", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to *Some settings are determined by your company. For further information, please contact your administrator.
         /// </summary>
         internal static string OptionsCompanyPolicyMessage {

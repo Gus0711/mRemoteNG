@@ -7,6 +7,7 @@ using mRemoteNG.Connection;
 using mRemoteNG.Connection.Protocol;
 using mRemoteNG.Connection.Protocol.VNC;
 using mRemoteNG.Properties;
+using mRemoteNG.Themes;
 using mRemoteNG.UI.Forms;
 using mRemoteNG.UI.Window;
 using mRemoteNG.UI.TaskDialog;
@@ -36,6 +37,17 @@ namespace mRemoteNG.UI.Tabs
             InitializeComponent();
             GotFocus += ConnectionTab_GotFocus;
             DockStateChanged += ConnectionTab_DockStateChanged;
+
+            // The connection surface shown while a session connects or around a smart-sized screen.
+            BackColor = ModernPalette.Current.Content;
+            ThemeManager.getInstance().ThemeChanged += ConnectionTab_ThemeChanged;
+            Disposed += (_, _) => ThemeManager.getInstance().ThemeChanged -= ConnectionTab_ThemeChanged;
+        }
+
+        private void ConnectionTab_ThemeChanged()
+        {
+            if (IsDisposed) return;
+            BackColor = ModernPalette.Current.Content;
         }
 
         internal bool CanMinimizeToBottomAutoHide()

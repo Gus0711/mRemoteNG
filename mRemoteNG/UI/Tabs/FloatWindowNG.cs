@@ -8,6 +8,7 @@ using mRemoteNG.Themes;
 
 namespace mRemoteNG.UI.Tabs
 {
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     class FloatWindowNG : FloatWindow
     {
         public FloatWindowNG(DockPanel dockPanel, DockPane pane)
@@ -32,6 +33,9 @@ namespace mRemoteNG.UI.Tabs
 
             // Allow the Windows default behavior of maximizing/restoring the window
             DoubleClickTitleBarToDock = true;
+
+            BackColor = ModernPalette.Current.Chrome;
+            ThemeManager.getInstance().ThemeChanged += OnThemeChanged;
         }
 
         // Apply the dark/light title bar before the window is shown to avoid a white flash.
@@ -39,6 +43,21 @@ namespace mRemoteNG.UI.Tabs
         {
             base.OnHandleCreated(e);
             ThemeManager.getInstance().ApplyThemeToTitleBar(this);
+        }
+
+        private void OnThemeChanged()
+        {
+            if (IsDisposed) return;
+            BackColor = ModernPalette.Current.Chrome;
+            ThemeManager.getInstance().ApplyThemeToTitleBar(this);
+            Invalidate(true);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                ThemeManager.getInstance().ThemeChanged -= OnThemeChanged;
+            base.Dispose(disposing);
         }
 
         [DllImport("User32.dll", CharSet = CharSet.Auto)]

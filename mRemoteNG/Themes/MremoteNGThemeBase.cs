@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Runtime.Versioning;
 using mRemoteNG.UI.Tabs;
 using WeifenLuo.WinFormsUI.Docking;
@@ -16,10 +17,34 @@ namespace mRemoteNG.Themes
         public MremoteNGThemeBase(byte[] themeResource)
             : base(themeResource)
         {
-            Measures.SplitterSize = 3;
-            Measures.AutoHideSplitterSize = 3;
-            Measures.DockPadding = 2;
+            ApplyModernMeasures(this);
             ShowAutoHideContentOnHover = false;
+        }
+
+        /// <summary>
+        /// Splitters are painted as a single hairline (see ModernSplitters) but keep a comfortable
+        /// hit area; no padding around the dock area so panels sit flush with the window edges.
+        /// </summary>
+        internal static void ApplyModernMeasures(ThemeBase theme)
+        {
+            int scale = Math.Max(1, (int)Math.Round(DpiScale()));
+            theme.Measures.SplitterSize = 5 * scale;
+            theme.Measures.AutoHideSplitterSize = 4 * scale;
+            theme.Measures.DockPadding = 0;
+            theme.Measures.AutoHideTabLineWidth = 2 * scale;
+        }
+
+        private static float DpiScale()
+        {
+            try
+            {
+                using Graphics g = Graphics.FromHwnd(IntPtr.Zero);
+                return g.DpiX / 96f;
+            }
+            catch
+            {
+                return 1f;
+            }
         }
     }
 

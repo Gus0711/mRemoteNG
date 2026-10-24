@@ -268,8 +268,12 @@ namespace mRemoteNG.UI.Window
             };
             _vsToolStripExtender.SetStyle(cmenTab, ThemeManager.getInstance().ActiveTheme.Version, ThemeManager.getInstance().ActiveTheme.Theme);
 
-            if (!ThemeManager.getInstance().ActiveAndExtended) return;
-            connDock.DockBackColor = ThemeManager.getInstance().ActiveTheme.ExtendedPalette.getColor("Tab_Item_Background");
+            // Layered surfaces: the connection area is the Content surface, without frames.
+            ModernPalette palette = ModernPalette.Current;
+            BackColor = palette.Content;
+            connDock.BackColor = palette.Content;
+            connDock.DockBackColor = palette.Content;
+            connDock.Invalidate(true);
         }
 
         private bool _documentHandlersAdded;

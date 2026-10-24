@@ -785,6 +785,9 @@ Voir l'article de support Microsoft http://support.microsoft.com/kb/811833 pour 
   <data name="Options" xml:space="preserve">
     <value>Options</value>
   </data>
+  <data name="AutoHide" xml:space="preserve">
+    <value>Masquer automatiquement</value>
+  </data>
   <data name="PortScan" xml:space="preserve">
     <value>Scan de ports</value>
   </data>
