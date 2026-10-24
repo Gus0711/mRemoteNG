@@ -239,7 +239,12 @@ namespace mRemoteNG.UI.Forms.OptionsPages
         /// </summary>
         private static string ColorKeyDisplayName(string key)
         {
-            return ColorKeyJaMap.TryGetValue(key, out var jp) ? jp : key;
+            if (System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "ja" &&
+                ColorKeyJaMap.TryGetValue(key, out var jp))
+                return jp;
+
+            // "Button_Hover_Background" -> "Button › Hover › Background" (the Japanese map only fits a Japanese UI)
+            return key.Replace("_", " › ");
         }
 
         // Japanese display labels for the palette keys defined in
