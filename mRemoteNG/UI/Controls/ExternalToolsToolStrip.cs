@@ -53,6 +53,34 @@ namespace mRemoteNG.UI.Controls
             CMenToolbarShowText.Size = new System.Drawing.Size(128, 22);
             CMenToolbarShowText.Text = Language.ShowText;
             CMenToolbarShowText.Click += CMenToolbarShowText_Click;
+            ModernToolStripRenderer.EnableModernMetrics(_cMenExtAppsToolbar);
+
+            Font = ModernToolStripRenderer.UiFont;
+            GripMargin = new Padding(2);
+            ApplyMetrics();
+        }
+
+        private int Scale(int logical) => (int)Math.Round(logical * DeviceDpi / 96f);
+
+        /// <summary>Header-friendly sizes: a 40px (logical) bar with 30px buttons.</summary>
+        private void ApplyMetrics()
+        {
+            Padding = new Padding(Scale(4), Scale(5), Scale(8), Scale(5));
+            MinimumSize = new System.Drawing.Size(0, Scale(40));
+            foreach (ToolStripItem item in Items)
+                ApplyButtonMetrics(item);
+        }
+
+        private void ApplyButtonMetrics(ToolStripItem item)
+        {
+            item.Padding = new Padding(Scale(6), Scale(5), Scale(6), Scale(5));
+            item.Margin = new Padding(0, 0, Scale(2), 0);
+        }
+
+        protected override void OnDpiChangedAfterParent(EventArgs e)
+        {
+            base.OnDpiChangedAfterParent(e);
+            ApplyMetrics();
         }
 
         #region Ext Apps Toolbar
@@ -84,6 +112,7 @@ namespace mRemoteNG.UI.Controls
                             : ToolStripItemDisplayStyle.ImageAndText;
 
                     button.Tag = tool;
+                    ApplyButtonMetrics(button);
                 }
             }
             catch (Exception ex)

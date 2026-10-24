@@ -16,24 +16,25 @@ using System.Runtime.Versioning;
 
 namespace mRemoteNG.UI.Controls
 {
+    /// <summary>
+    /// Quick connect toolbar: rounded search-style input (with protocol pill and history), a primary
+    /// accent "Connect" button and the connections drop-down.
+    /// </summary>
     [SupportedOSPlatform("windows")]
     public class QuickConnectToolStrip : ToolStrip
     {
         private IContainer components;
-        private ToolStripLabel _lblQuickConnect;
         private ToolStripDropDownButton _btnConnections;
-        private MrngToolStripSplitButton _btnQuickConnect;
+        private ToolStripButton _btnQuickConnect;
         private ContextMenuStrip _mnuQuickConnectProtocol;
         private QuickConnectComboBox _cmbQuickConnect;
         private ContextMenuStrip _mnuConnections;
         private readonly ThemeManager _themeManager;
         private WeifenLuo.WinFormsUI.Docking.VisualStudioToolStripExtender vsToolStripExtender;
-        private readonly DisplayProperties _display;
 
 
         public QuickConnectToolStrip()
         {
-            _display = new DisplayProperties();
             Initialize();
             _themeManager = ThemeManager.getInstance();
             _themeManager.ThemeChanged += ApplyTheme;
@@ -42,17 +43,19 @@ namespace mRemoteNG.UI.Controls
             ApplyLanguage();
         }
 
-        private void ApplyLanguage()
+        public void ApplyLanguage()
         {
-            _lblQuickConnect.Text = Language.QuickConnect;
+            _btnQuickConnect.Text = Language.Connect;
+            _btnQuickConnect.ToolTipText = Language.QuickConnect;
+            _btnConnections.Text = Language.Connections;
+            _cmbQuickConnect.PlaceholderText = Language.QuickConnectPlaceholder;
         }
 
         private void Initialize()
         {
             components = new System.ComponentModel.Container();
-            _lblQuickConnect = new ToolStripLabel();
             _cmbQuickConnect = new QuickConnectComboBox();
-            _btnQuickConnect = new MrngToolStripSplitButton();
+            _btnQuickConnect = new ToolStripButton();
             _mnuQuickConnectProtocol = new ContextMenuStrip(components);
             _btnConnections = new ToolStripDropDownButton();
             _mnuConnections = new ContextMenuStrip(components);
@@ -61,91 +64,93 @@ namespace mRemoteNG.UI.Controls
             //Theming support
             //
             vsToolStripExtender = new WeifenLuo.WinFormsUI.Docking.VisualStudioToolStripExtender(components);
-            // 
-            // lblQuickConnect
-            // 
-            _lblQuickConnect.Name = "lblQuickConnect";
-            _lblQuickConnect.Size = new Size(55, 22);
-            _lblQuickConnect.Text = Language.Connect;
-            _lblQuickConnect.Click += lblQuickConnect_Click;
-            // 
+            //
             // cmbQuickConnect
-            // 
-            _cmbQuickConnect.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
-            _cmbQuickConnect.AutoCompleteSource = AutoCompleteSource.ListItems;
-            _cmbQuickConnect.Margin = new Padding(1, 0, 3, 0);
+            //
             _cmbQuickConnect.Name = "cmbQuickConnect";
-            _cmbQuickConnect.Size = new Size(_display.ScaleWidth(200), 25);
+            _cmbQuickConnect.ProtocolMenu = _mnuQuickConnectProtocol;
             _cmbQuickConnect.ConnectRequested += cmbQuickConnect_ConnectRequested;
             _cmbQuickConnect.ProtocolChanged += cmbQuickConnect_ProtocolChanged;
-            // 
+            //
             // tsQuickConnect
-            // 
+            //
             Dock = DockStyle.None;
+            GripMargin = new Padding(2);
             Items.AddRange(new ToolStripItem[]
             {
-                _lblQuickConnect,
                 _cmbQuickConnect,
                 _btnQuickConnect,
                 _btnConnections
             });
             Location = new Point(3, 24);
             Name = "tsQuickConnect";
-            Size = new Size(_display.ScaleWidth(387), 25);
             TabIndex = 18;
-            // 
+            //
             // btnQuickConnect
-            // 
-            _btnQuickConnect.DropDown = _mnuQuickConnectProtocol;
-            _btnQuickConnect.Image = Properties.Resources.Run_16x;
-            _btnQuickConnect.ImageTransparentColor = Color.Magenta;
-            _btnQuickConnect.Margin = new Padding(0, 1, 3, 2);
+            //
+            _btnQuickConnect.DisplayStyle = ToolStripItemDisplayStyle.ImageAndText;
             _btnQuickConnect.Name = "btnQuickConnect";
-            _btnQuickConnect.Size = new Size(84, 22);
             _btnQuickConnect.Text = Language.Connect;
-            _btnQuickConnect.ButtonClick += btnQuickConnect_ButtonClick;
-            _btnQuickConnect.DropDownItemClicked += btnQuickConnect_DropDownItemClicked;
-            // 
+            _btnQuickConnect.Click += btnQuickConnect_ButtonClick;
+            ToolStripGlyphs.Set(_btnQuickConnect, FluentIcons.Play);
+            ModernToolStripRenderer.SetPrimary(_btnQuickConnect);
+            //
             // mnuQuickConnectProtocol
-            // 
+            //
             _mnuQuickConnectProtocol.Name = "mnuQuickConnectProtocol";
-            _mnuQuickConnectProtocol.OwnerItem = _btnQuickConnect;
             _mnuQuickConnectProtocol.ShowCheckMargin = true;
             _mnuQuickConnectProtocol.ShowImageMargin = false;
-            _mnuQuickConnectProtocol.Size = new Size(61, 4);
-            // 
+            _mnuQuickConnectProtocol.ItemClicked += mnuQuickConnectProtocol_ItemClicked;
+            //
             // btnConnections
-            // 
+            //
             _btnConnections.DisplayStyle = ToolStripItemDisplayStyle.Image;
             _btnConnections.DropDown = _mnuConnections;
-            _btnConnections.Image = Properties.Resources.ASPWebSite_16x;
-            _btnConnections.ImageScaling = ToolStripItemImageScaling.SizeToFit;
-            _btnConnections.ImageTransparentColor = Color.Magenta;
             _btnConnections.Name = "btnConnections";
-            _btnConnections.Size = new Size(29, 22);
             _btnConnections.Text = Language.Connections;
             _btnConnections.DropDownOpening += btnConnections_DropDownOpening;
-            // 
+            ToolStripGlyphs.Set(_btnConnections, ChromeGlyphs.List);
+            //
             // mnuConnections
-            // 
+            //
             _mnuConnections.Name = "mnuConnections";
             _mnuConnections.OwnerItem = _btnConnections;
-            _mnuConnections.Size = new Size(61, 4);
 
+            ApplyMetrics();
             ResumeLayout();
+        }
+
+        /// <summary>Header-friendly sizes: a 40px (logical) bar with 30px controls.</summary>
+        private void ApplyMetrics()
+        {
+            float scale = DeviceDpi / 96f;
+            int s(int v) => (int)Math.Round(v * scale);
+
+            Padding = new Padding(s(4), s(5), s(8), s(5));
+            MinimumSize = new Size(0, s(40));
+            _btnQuickConnect.Padding = new Padding(s(10), s(5), s(12), s(5));
+            _btnQuickConnect.Margin = new Padding(s(2), 0, s(2), 0);
+            _btnConnections.Padding = new Padding(s(6), s(5), s(4), s(5));
+            _btnConnections.Margin = new Padding(s(2), 0, 0, 0);
+        }
+
+        protected override void OnDpiChangedAfterParent(EventArgs e)
+        {
+            base.OnDpiChangedAfterParent(e);
+            ApplyMetrics();
         }
 
         private void ApplyTheme()
         {
+            Font = ModernToolStripRenderer.UiFont;
             if (!_themeManager.ThemingActive) return;
             vsToolStripExtender.SetStyle(_mnuQuickConnectProtocol, _themeManager.ActiveTheme.Version,
                                          _themeManager.ActiveTheme.Theme);
             vsToolStripExtender.SetStyle(_mnuConnections, _themeManager.ActiveTheme.Version,
                                          _themeManager.ActiveTheme.Theme);
-
-            if (!_themeManager.ActiveAndExtended) return;
-            _cmbQuickConnect.BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Background");
-            _cmbQuickConnect.ForeColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Foreground");
+            vsToolStripExtender.SetStyle(_cmbQuickConnect.HistoryDropDown, _themeManager.ActiveTheme.Version,
+                                         _themeManager.ActiveTheme.Theme);
+            _cmbQuickConnect.Input.Invalidate();
         }
 
         #region Quick Connect
@@ -162,21 +167,19 @@ namespace mRemoteNG.UI.Controls
                     if (fieldInfo.Name == Settings.Default.QuickConnectProtocol)
                     {
                         menuItem.Checked = true;
-                        _btnQuickConnect.Text = Settings.Default.QuickConnectProtocol;
+                        _cmbQuickConnect.ProtocolText = Settings.Default.QuickConnectProtocol;
                     }
 
                     _mnuQuickConnectProtocol.Items.Add(menuItem);
                 }
+
+                if (string.IsNullOrEmpty(_cmbQuickConnect.ProtocolText))
+                    _cmbQuickConnect.ProtocolText = Settings.Default.QuickConnectProtocol;
             }
             catch (Exception ex)
             {
                 Runtime.MessageCollector.AddExceptionStackTrace("PopulateQuickConnectProtocolMenu() failed.", ex);
             }
-        }
-
-        private void lblQuickConnect_Click(object sender, EventArgs e)
-        {
-            _cmbQuickConnect.Focus();
         }
 
         private void cmbQuickConnect_ConnectRequested(object sender, QuickConnectComboBox.ConnectRequestedEventArgs e)
@@ -212,7 +215,7 @@ namespace mRemoteNG.UI.Controls
             SetQuickConnectProtocol(Converter.ProtocolToString(e.Protocol));
         }
 
-        private void btnQuickConnect_DropDownItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        private void mnuQuickConnectProtocol_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
             SetQuickConnectProtocol(e.ClickedItem.Text);
             if (string.IsNullOrEmpty(_cmbQuickConnect.Text))
@@ -224,7 +227,7 @@ namespace mRemoteNG.UI.Controls
         private void SetQuickConnectProtocol(string protocol)
         {
             Settings.Default.QuickConnectProtocol = protocol;
-            _btnQuickConnect.Text = protocol;
+            _cmbQuickConnect.ProtocolText = protocol;
             foreach (ToolStripMenuItem menuItem in _mnuQuickConnectProtocol.Items)
             {
                 menuItem.Checked = menuItem.Text.Equals(protocol);
@@ -249,7 +252,8 @@ namespace mRemoteNG.UI.Controls
                                                                                  .ConnectionTreeModel).ToArray();
             _btnConnections.DropDownItems.AddRange(rootMenuItems);
 
-            ToolStripMenuItem favorites = new(Language.Favorites, Properties.Resources.Favorite_16x);
+            ToolStripMenuItem favorites = new(Language.Favorites);
+            ToolStripGlyphs.Set(favorites, FluentIcons.Favorite);
             List<ContainerInfo> rootNodes = Runtime.ConnectionsService.ConnectionTreeModel.RootNodes;
             List<ToolStripMenuItem> favoritesList = [];
 
@@ -260,9 +264,12 @@ namespace mRemoteNG.UI.Controls
                     ToolStripMenuItem favoriteMenuItem = new()
                     {
                         Text = containerInfo.Name,
-                        Tag = containerInfo,
-                        Image = containerInfo.OpenConnections.Count > 0 ? Properties.Resources.Run_16x : Properties.Resources.Stop_16x
+                        Tag = containerInfo
                     };
+                    if (containerInfo.OpenConnections.Count > 0)
+                        ToolStripGlyphs.Set(favoriteMenuItem, FluentIcons.Play, ToolStripGlyphs.GlyphRole.Success);
+                    else
+                        ToolStripGlyphs.Set(favoriteMenuItem, FluentIcons.Desktop, ToolStripGlyphs.GlyphRole.Secondary);
                     favoriteMenuItem.MouseUp += ConnectionsMenuItem_MouseUp;
                     favoritesList.Add(favoriteMenuItem);
                 }
@@ -299,6 +306,7 @@ namespace mRemoteNG.UI.Controls
             try
             {
                 if (!disposing) return;
+                _themeManager.ThemeChanged -= ApplyTheme;
                 components?.Dispose();
             }
             finally

@@ -3891,6 +3891,15 @@ namespace mRemoteNG.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Send a command to all SSH sessions.
+        /// </summary>
+        internal static string MultiSshPlaceholder {
+            get {
+                return ResourceManager.GetString("MultiSshPlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Must Be Between 0 and 255.
         /// </summary>
         internal static string MustBeBetween0And255 {
@@ -5751,6 +5760,24 @@ namespace mRemoteNG.Resources.Language {
         internal static string QuickConnectAddFailed {
             get {
                 return ResourceManager.GetString("QuickConnectAddFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quick connect: hostname or IP.
+        /// </summary>
+        internal static string QuickConnectPlaceholder {
+            get {
+                return ResourceManager.GetString("QuickConnectPlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recent connections.
+        /// </summary>
+        internal static string QuickConnectRecent {
+            get {
+                return ResourceManager.GetString("QuickConnectRecent", resourceCulture);
             }
         }
         

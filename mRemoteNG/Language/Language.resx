@@ -1485,6 +1485,12 @@ If you run into such an error, please create a new connection file!</value>
   <data name="QuickConnectAddFailed" xml:space="preserve">
     <value>Quick Connect Add Failed!</value>
   </data>
+  <data name="QuickConnectPlaceholder" xml:space="preserve">
+    <value>Quick connect: hostname or IP</value>
+  </data>
+  <data name="QuickConnectRecent" xml:space="preserve">
+    <value>Recent connections</value>
+  </data>
   <data name="QuickConnectFailed" xml:space="preserve">
     <value>Creating quick connect failed</value>
   </data>
@@ -2228,6 +2234,9 @@ Nightly Channel includes Alphas, Betas &amp; Release Candidates.</value>
   </data>
   <data name="MultiSshToolTip" xml:space="preserve">
     <value>Press ENTER to send. Ctrl+C is sent immediately.</value>
+  </data>
+  <data name="MultiSshPlaceholder" xml:space="preserve">
+    <value>Send a command to all SSH sessions</value>
   </data>
   <data name="PropertyDescriptionFavorite" xml:space="preserve">
     <value>Show this connection in the favorites menu.</value>

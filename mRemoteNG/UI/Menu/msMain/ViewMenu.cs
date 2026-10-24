@@ -84,7 +84,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenViewAddConnectionPanel
             // 
-            _mMenViewAddConnectionPanel.Image = Properties.Resources.InsertPanel_16x;
+            ToolStripGlyphs.Set(_mMenViewAddConnectionPanel, FluentIcons.Add);
             _mMenViewAddConnectionPanel.Name = "mMenViewAddConnectionPanel";
             _mMenViewAddConnectionPanel.Size = new System.Drawing.Size(228, 22);
             _mMenViewAddConnectionPanel.Text = Language.AddConnectionPanel;
@@ -92,7 +92,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenReconnectAll
             // 
-            _mMenReconnectAll.Image = Properties.Resources.Refresh_16x;
+            ToolStripGlyphs.Set(_mMenReconnectAll, FluentIcons.Refresh);
             _mMenReconnectAll.Name = "mMenReconnectAll";
             _mMenReconnectAll.Size = new System.Drawing.Size(281, 22);
             _mMenReconnectAll.Text = Language.ReconnectAllConnections;
@@ -100,7 +100,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenViewConnectionPanels
             // 
-            _mMenViewConnectionPanels.Image = Properties.Resources.Panel_16x;
+            ToolStripGlyphs.Set(_mMenViewConnectionPanels, ChromeGlyphs.Tiles);
             _mMenViewConnectionPanels.Name = "mMenViewConnectionPanels";
             _mMenViewConnectionPanels.Size = new System.Drawing.Size(228, 22);
             _mMenViewConnectionPanels.Text = Language.ConnectionPanels;
@@ -170,7 +170,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenViewFullscreen
             // 
-            _mMenViewFullscreen.Image = Properties.Resources.FullScreen_16x;
+            ToolStripGlyphs.Set(_mMenViewFullscreen, FluentIcons.FullScreen);
             _mMenViewFullscreen.Name = "mMenViewFullscreen";
             _mMenViewFullscreen.ShortcutKeys = Keys.F11;
             _mMenViewFullscreen.Size = new System.Drawing.Size(228, 22);

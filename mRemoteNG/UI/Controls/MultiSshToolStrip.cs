@@ -16,8 +16,8 @@ namespace mRemoteNG.UI.Controls
     public partial class MultiSshToolStrip : ToolStrip
     {
         private IContainer components;
-        private ToolStripLabel lblMultiSsh;
-        private ToolStripTextBox txtMultiSsh;
+        private ModernInputHost hostMultiSsh;
+        private TextBox txtMultiSsh;
         private int previousCommandIndex = 0;
         private readonly ArrayList processHandlers = [];
         private readonly ArrayList quickConnectConnections = [];
@@ -36,9 +36,29 @@ namespace mRemoteNG.UI.Controls
 
         private void ApplyTheme()
         {
-            if (!_themeManager.ActiveAndExtended) return;
-            txtMultiSsh.BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Background");
-            txtMultiSsh.ForeColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Foreground");
+            // The rounded input follows the modern palette by itself.
+            Font = ModernToolStripRenderer.UiFont;
+            hostMultiSsh.Input.Invalidate();
+        }
+
+        public void ApplyLanguage()
+        {
+            hostMultiSsh.Input.PlaceholderText = Language.MultiSshPlaceholder;
+            hostMultiSsh.ToolTipText = Language.MultiSshToolTip;
+        }
+
+        /// <summary>Header-friendly sizes: a 40px (logical) bar with a 30px input.</summary>
+        private void ApplyMetrics()
+        {
+            float scale = DeviceDpi / 96f;
+            Padding = new Padding((int)Math.Round(4 * scale), (int)Math.Round(5 * scale), (int)Math.Round(8 * scale), (int)Math.Round(5 * scale));
+            MinimumSize = new System.Drawing.Size(MinimumSize.Width, (int)Math.Round(40 * scale));
+        }
+
+        protected override void OnDpiChangedAfterParent(EventArgs e)
+        {
+            base.OnDpiChangedAfterParent(e);
+            ApplyMetrics();
         }
 
         private ArrayList ProcessOpenConnections(ConnectionInfo connection)
@@ -122,6 +142,7 @@ namespace mRemoteNG.UI.Controls
                 }
 
                 SendAllKeystrokes(NativeMethods.WM_KEYDOWN, 13); // Enter = char13
+                e.SuppressKeyPress = true; // no "ding" from the single-line text box
             }
         }
 
@@ -146,6 +167,7 @@ namespace mRemoteNG.UI.Controls
             {
                 if(components != null)
                     components.Dispose();
+                _themeManager.ThemeChanged -= ApplyTheme;
             }
 
             base.Dispose(disposing);
@@ -158,30 +180,30 @@ namespace mRemoteNG.UI.Controls
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.lblMultiSsh = new ToolStripLabel();
-            this.txtMultiSsh = new ToolStripTextBox();
+            ModernInputBox inputMultiSsh = new()
+            {
+                LeadingGlyph = FluentIcons.Terminal,
+                PlaceholderText = Language.MultiSshPlaceholder
+            };
+            this.hostMultiSsh = new ModernInputHost(inputMultiSsh, 340);
+            this.txtMultiSsh = inputMultiSsh.InnerTextBox;
             this.SuspendLayout();
             // 
-            // lblMultiSSH
+            // hostMultiSsh / txtMultiSsh
             // 
-            this.lblMultiSsh.Name = "_lblMultiSsh";
-            this.lblMultiSsh.Size = new System.Drawing.Size(77, 22);
-            this.lblMultiSsh.Text = Language.MultiSsh;
-            // 
-            // txtMultiSsh
-            // 
+            this.hostMultiSsh.Name = "_hostMultiSsh";
+            this.hostMultiSsh.ToolTipText = Language.MultiSshToolTip;
             this.txtMultiSsh.Name = "_txtMultiSsh";
-            this.txtMultiSsh.Size = new System.Drawing.Size(new DisplayProperties().ScaleWidth(300), 25);
-            this.txtMultiSsh.ToolTipText = Language.MultiSshToolTip;
             this.txtMultiSsh.Enter += RefreshActiveConnections;
             this.txtMultiSsh.KeyDown += ProcessKeyPress;
             this.txtMultiSsh.KeyUp += ProcessKeyRelease;
 
+            this.GripMargin = new Padding(2);
             this.Items.AddRange(new ToolStripItem[]
             {
-                lblMultiSsh,
-                txtMultiSsh
+                hostMultiSsh
             });
+            ApplyMetrics();
             this.ResumeLayout(false);
         }
 

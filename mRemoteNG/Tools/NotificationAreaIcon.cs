@@ -28,21 +28,24 @@ namespace mRemoteNG.Tools
             {
                 _cMenCons = new ToolStripMenuItem
                 {
-                    Text = Language.Connections,
-                    Image = Properties.Resources.ASPWebSite_16x
+                    Text = Language.Connections
                 };
+                UI.ToolStripGlyphs.Set(_cMenCons, UI.FluentIcons.Globe);
 
                 ToolStripSeparator cMenSep1 = new();
 
                 ToolStripMenuItem cMenExit = new() { Text = Language.Exit};
+                UI.ToolStripGlyphs.Set(cMenExit, UI.FluentIcons.Power);
                 cMenExit.Click += cMenExit_Click;
 
                 _cMen = new ContextMenuStrip
                 {
-                    Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular,
-                                                   System.Drawing.GraphicsUnit.Point, Convert.ToByte(0)),
-                    RenderMode = ToolStripRenderMode.Professional
+                    Font = UI.ModernToolStripRenderer.UiFont,
+                    // Follows ToolStripManager.Renderer, which the main window sets to the modern
+                    // renderer for the Modern themes (professional renderer otherwise).
+                    RenderMode = ToolStripRenderMode.ManagerRenderMode
                 };
+                UI.ModernToolStripRenderer.EnableModernMetrics(_cMen);
                 _cMen.Items.AddRange(new ToolStripItem[] {_cMenCons, cMenSep1, cMenExit});
 
                 _nI = new NotifyIcon

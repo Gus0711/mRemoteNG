@@ -51,6 +51,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenSessionsNextSession
             // 
+            ToolStripGlyphs.Set(_mMenSessionsNextSession, ChromeGlyphs.Next);
             _mMenSessionsNextSession.Name = "mMenSessionsNextSession";
             _mMenSessionsNextSession.ShortcutKeys = Keys.Control | Keys.Right;
             _mMenSessionsNextSession.Size = new System.Drawing.Size(230, 22);
@@ -60,6 +61,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenSessionsPreviousSession
             // 
+            ToolStripGlyphs.Set(_mMenSessionsPreviousSession, ChromeGlyphs.Previous);
             _mMenSessionsPreviousSession.Name = "mMenSessionsPreviousSession";
             _mMenSessionsPreviousSession.ShortcutKeys = Keys.Control | Keys.Left;
             _mMenSessionsPreviousSession.Size = new System.Drawing.Size(230, 22);
