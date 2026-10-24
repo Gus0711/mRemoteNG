@@ -169,7 +169,9 @@ namespace mRemoteNG.Config.Settings
 
         private void SetToolbarsDefault()
         {
-            ToolStripPanelFromString("top").Join(_quickConnectToolStrip, new Point(300, 0));
+            ToolStripPanel top = ToolStripPanelFromString("top");
+            top.Join(_mainMenu, new Point(3, 0));
+            top.Join(_quickConnectToolStrip, AfterMainMenu(new Point(300, 0)));
             _quickConnectToolStrip.Visible = true;
             ToolStripPanelFromString("bottom").Join(_externalToolsToolStrip, new Point(3, 0));
             _externalToolsToolStrip.Visible = false;
@@ -210,7 +212,20 @@ namespace mRemoteNG.Config.Settings
             SetToolstripGripStyle(_quickConnectToolStrip);
             _quickConnectToolStrip.Visible = Properties.Settings.Default.QuickyTBVisible;
             ToolStripPanel toolStripPanel = ToolStripPanelFromString(Properties.Settings.Default.QuickyTBParentDock);
-            toolStripPanel.Join(_quickConnectToolStrip, Properties.Settings.Default.QuickyTBLocation);
+            Point location = string.Equals(Properties.Settings.Default.QuickyTBParentDock, "top", StringComparison.OrdinalIgnoreCase)
+                ? AfterMainMenu(Properties.Settings.Default.QuickyTBLocation)
+                : Properties.Settings.Default.QuickyTBLocation;
+            toolStripPanel.Join(_quickConnectToolStrip, location);
+        }
+
+        // Keeps a toolbar that shares the menu row to the right of the main menu
+        // (the modern menu font and padding make the menu wider than the old default offsets).
+        private Point AfterMainMenu(Point location)
+        {
+            int menuRight = _mainMenu.Left + _mainMenu.PreferredSize.Width;
+            return location.Y < _mainMenu.Height && location.X < menuRight
+                ? new Point(menuRight + 1, location.Y)
+                : location;
         }
 
         private void AddExternalAppsPanel()
