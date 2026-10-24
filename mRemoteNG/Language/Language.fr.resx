@@ -575,6 +575,111 @@ Voir l'article de support Microsoft http://support.microsoft.com/kb/811833 pour 
   <data name="General" xml:space="preserve">
     <value>Général</value>
   </data>
+  <data name="HomeTitle" xml:space="preserve">
+    <value>Accueil</value>
+  </data>
+  <data name="HomeSubtitle" xml:space="preserve">
+    <value>Où souhaitez-vous vous connecter aujourd'hui ?</value>
+  </data>
+  <data name="HomeGreetingMorning" xml:space="preserve">
+    <value>Bonjour</value>
+  </data>
+  <data name="HomeGreetingAfternoon" xml:space="preserve">
+    <value>Bon après-midi</value>
+  </data>
+  <data name="HomeGreetingEvening" xml:space="preserve">
+    <value>Bonsoir</value>
+  </data>
+  <data name="HomeQuickConnectPlaceholder" xml:space="preserve">
+    <value>Connexion rapide : hôte, utilisateur@hôte:port, ssh://hôte, rdp://hôte… ou nom d'une connexion</value>
+  </data>
+  <data name="HomeConnectButton" xml:space="preserve">
+    <value>Connecter</value>
+  </data>
+  <data name="HomePaletteHint" xml:space="preserve">
+    <value>pour rechercher une connexion ou lancer une commande, où que vous soyez</value>
+  </data>
+  <data name="HomeStatFolders" xml:space="preserve">
+    <value>Dossiers</value>
+  </data>
+  <data name="HomeStatOpenSessions" xml:space="preserve">
+    <value>Sessions ouvertes</value>
+  </data>
+  <data name="HomeClearRecent" xml:space="preserve">
+    <value>Effacer</value>
+  </data>
+  <data name="HomeRecentEmpty" xml:space="preserve">
+    <value>Les connexions que vous ouvrez apparaîtront ici.</value>
+  </data>
+  <data name="HomeQuickActions" xml:space="preserve">
+    <value>Actions rapides</value>
+  </data>
+  <data name="HomeShowOnStartup" xml:space="preserve">
+    <value>Afficher l'accueil au démarrage</value>
+  </data>
+  <data name="HomePin" xml:space="preserve">
+    <value>Ajouter aux favoris</value>
+  </data>
+  <data name="HomeUnpin" xml:space="preserve">
+    <value>Retirer des favoris</value>
+  </data>
+  <data name="HomeRemoveRecent" xml:space="preserve">
+    <value>Retirer des récents</value>
+  </data>
+  <data name="PaletteTitle" xml:space="preserve">
+    <value>Palette de commandes</value>
+  </data>
+  <data name="PalettePlaceholder" xml:space="preserve">
+    <value>Rechercher une connexion, une commande, ou saisir un hôte…</value>
+  </data>
+  <data name="PaletteGroupRecent" xml:space="preserve">
+    <value>Récents</value>
+  </data>
+  <data name="PaletteGroupCommands" xml:space="preserve">
+    <value>Commandes</value>
+  </data>
+  <data name="PaletteQuickConnectTo" xml:space="preserve">
+    <value>Se connecter à {0}</value>
+  </data>
+  <data name="PaletteNoResults" xml:space="preserve">
+    <value>Aucun résultat pour « {0} »</value>
+  </data>
+  <data name="PaletteHintNavigate" xml:space="preserve">
+    <value>naviguer</value>
+  </data>
+  <data name="PaletteHintOpen" xml:space="preserve">
+    <value>ouvrir</value>
+  </data>
+  <data name="PaletteHintClose" xml:space="preserve">
+    <value>fermer</value>
+  </data>
+  <data name="PaletteHintCommands" xml:space="preserve">
+    <value>commandes uniquement</value>
+  </data>
+  <data name="PaletteShowPanel" xml:space="preserve">
+    <value>Afficher le panneau : {0}</value>
+  </data>
+  <data name="PaletteSwitchToLight" xml:space="preserve">
+    <value>Passer au thème clair</value>
+  </data>
+  <data name="PaletteSwitchToDark" xml:space="preserve">
+    <value>Passer au thème sombre</value>
+  </data>
+  <data name="TimeJustNow" xml:space="preserve">
+    <value>à l'instant</value>
+  </data>
+  <data name="TimeMinutesAgo" xml:space="preserve">
+    <value>il y a {0} min</value>
+  </data>
+  <data name="TimeHoursAgo" xml:space="preserve">
+    <value>il y a {0} h</value>
+  </data>
+  <data name="TimeYesterday" xml:space="preserve">
+    <value>hier</value>
+  </data>
+  <data name="TimeDaysAgo" xml:space="preserve">
+    <value>il y a {0} jours</value>
+  </data>
   <data name="GetConnectionInfoFromXmlFailed" xml:space="preserve">
     <value>Une erreur est survenue pendant le chargement de l'entrée de connexion "{0}" depuis "{1}". {2}</value>
   </data>

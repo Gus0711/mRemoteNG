@@ -3018,6 +3018,321 @@ namespace mRemoteNG.Resources.Language {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Home.
+        /// </summary>
+        internal static string HomeTitle {
+            get {
+                return ResourceManager.GetString("HomeTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Where would you like to connect today?.
+        /// </summary>
+        internal static string HomeSubtitle {
+            get {
+                return ResourceManager.GetString("HomeSubtitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Good morning.
+        /// </summary>
+        internal static string HomeGreetingMorning {
+            get {
+                return ResourceManager.GetString("HomeGreetingMorning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Good afternoon.
+        /// </summary>
+        internal static string HomeGreetingAfternoon {
+            get {
+                return ResourceManager.GetString("HomeGreetingAfternoon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Good evening.
+        /// </summary>
+        internal static string HomeGreetingEvening {
+            get {
+                return ResourceManager.GetString("HomeGreetingEvening", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quick connect: host, user@host:port, ssh://host, rdp://host… or a connection name.
+        /// </summary>
+        internal static string HomeQuickConnectPlaceholder {
+            get {
+                return ResourceManager.GetString("HomeQuickConnectPlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect.
+        /// </summary>
+        internal static string HomeConnectButton {
+            get {
+                return ResourceManager.GetString("HomeConnectButton", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to to search connections and run commands from anywhere.
+        /// </summary>
+        internal static string HomePaletteHint {
+            get {
+                return ResourceManager.GetString("HomePaletteHint", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Folders.
+        /// </summary>
+        internal static string HomeStatFolders {
+            get {
+                return ResourceManager.GetString("HomeStatFolders", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Open sessions.
+        /// </summary>
+        internal static string HomeStatOpenSessions {
+            get {
+                return ResourceManager.GetString("HomeStatOpenSessions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Clear.
+        /// </summary>
+        internal static string HomeClearRecent {
+            get {
+                return ResourceManager.GetString("HomeClearRecent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The connections you open will appear here..
+        /// </summary>
+        internal static string HomeRecentEmpty {
+            get {
+                return ResourceManager.GetString("HomeRecentEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Quick actions.
+        /// </summary>
+        internal static string HomeQuickActions {
+            get {
+                return ResourceManager.GetString("HomeQuickActions", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show the home page at startup.
+        /// </summary>
+        internal static string HomeShowOnStartup {
+            get {
+                return ResourceManager.GetString("HomeShowOnStartup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add to favorites.
+        /// </summary>
+        internal static string HomePin {
+            get {
+                return ResourceManager.GetString("HomePin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove from favorites.
+        /// </summary>
+        internal static string HomeUnpin {
+            get {
+                return ResourceManager.GetString("HomeUnpin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove from recent.
+        /// </summary>
+        internal static string HomeRemoveRecent {
+            get {
+                return ResourceManager.GetString("HomeRemoveRecent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Command Palette.
+        /// </summary>
+        internal static string PaletteTitle {
+            get {
+                return ResourceManager.GetString("PaletteTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Search connections and commands, or type a host to connect….
+        /// </summary>
+        internal static string PalettePlaceholder {
+            get {
+                return ResourceManager.GetString("PalettePlaceholder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Recent.
+        /// </summary>
+        internal static string PaletteGroupRecent {
+            get {
+                return ResourceManager.GetString("PaletteGroupRecent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Commands.
+        /// </summary>
+        internal static string PaletteGroupCommands {
+            get {
+                return ResourceManager.GetString("PaletteGroupCommands", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Connect to {0}.
+        /// </summary>
+        internal static string PaletteQuickConnectTo {
+            get {
+                return ResourceManager.GetString("PaletteQuickConnectTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No results for “{0}”.
+        /// </summary>
+        internal static string PaletteNoResults {
+            get {
+                return ResourceManager.GetString("PaletteNoResults", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to navigate.
+        /// </summary>
+        internal static string PaletteHintNavigate {
+            get {
+                return ResourceManager.GetString("PaletteHintNavigate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to open.
+        /// </summary>
+        internal static string PaletteHintOpen {
+            get {
+                return ResourceManager.GetString("PaletteHintOpen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to close.
+        /// </summary>
+        internal static string PaletteHintClose {
+            get {
+                return ResourceManager.GetString("PaletteHintClose", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to commands only.
+        /// </summary>
+        internal static string PaletteHintCommands {
+            get {
+                return ResourceManager.GetString("PaletteHintCommands", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Show panel: {0}.
+        /// </summary>
+        internal static string PaletteShowPanel {
+            get {
+                return ResourceManager.GetString("PaletteShowPanel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Switch to light theme.
+        /// </summary>
+        internal static string PaletteSwitchToLight {
+            get {
+                return ResourceManager.GetString("PaletteSwitchToLight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Switch to dark theme.
+        /// </summary>
+        internal static string PaletteSwitchToDark {
+            get {
+                return ResourceManager.GetString("PaletteSwitchToDark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to just now.
+        /// </summary>
+        internal static string TimeJustNow {
+            get {
+                return ResourceManager.GetString("TimeJustNow", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} min ago.
+        /// </summary>
+        internal static string TimeMinutesAgo {
+            get {
+                return ResourceManager.GetString("TimeMinutesAgo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} h ago.
+        /// </summary>
+        internal static string TimeHoursAgo {
+            get {
+                return ResourceManager.GetString("TimeHoursAgo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to yesterday.
+        /// </summary>
+        internal static string TimeYesterday {
+            get {
+                return ResourceManager.GetString("TimeYesterday", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} days ago.
+        /// </summary>
+        internal static string TimeDaysAgo {
+            get {
+                return ResourceManager.GetString("TimeDaysAgo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An error occured while loading the connection entry for &quot;{0}&quot; from &quot;{1}&quot;. {2}.
         /// </summary>
         internal static string GetConnectionInfoFromXmlFailed {

@@ -276,6 +276,7 @@ namespace mRemoteNG.UI.Forms
 
             EnsureGeneralPanel();
             ShowHidePanelTabs();
+            Modern.ModernExperience.Install(this, viewMenu); // home page, command palette (Ctrl+K)
 
             if (!Properties.OptionsTabsPanelsPage.Default.CreateEmptyPanelOnStartUp)
             {

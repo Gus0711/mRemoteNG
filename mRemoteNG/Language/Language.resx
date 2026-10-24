@@ -617,6 +617,111 @@ See the Microsoft Support article at http://support.microsoft.com/kb/811833 for 
   <data name="General" xml:space="preserve">
     <value>General</value>
   </data>
+  <data name="HomeTitle" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="HomeSubtitle" xml:space="preserve">
+    <value>Where would you like to connect today?</value>
+  </data>
+  <data name="HomeGreetingMorning" xml:space="preserve">
+    <value>Good morning</value>
+  </data>
+  <data name="HomeGreetingAfternoon" xml:space="preserve">
+    <value>Good afternoon</value>
+  </data>
+  <data name="HomeGreetingEvening" xml:space="preserve">
+    <value>Good evening</value>
+  </data>
+  <data name="HomeQuickConnectPlaceholder" xml:space="preserve">
+    <value>Quick connect: host, user@host:port, ssh://host, rdp://host… or a connection name</value>
+  </data>
+  <data name="HomeConnectButton" xml:space="preserve">
+    <value>Connect</value>
+  </data>
+  <data name="HomePaletteHint" xml:space="preserve">
+    <value>to search connections and run commands from anywhere</value>
+  </data>
+  <data name="HomeStatFolders" xml:space="preserve">
+    <value>Folders</value>
+  </data>
+  <data name="HomeStatOpenSessions" xml:space="preserve">
+    <value>Open sessions</value>
+  </data>
+  <data name="HomeClearRecent" xml:space="preserve">
+    <value>Clear</value>
+  </data>
+  <data name="HomeRecentEmpty" xml:space="preserve">
+    <value>The connections you open will appear here.</value>
+  </data>
+  <data name="HomeQuickActions" xml:space="preserve">
+    <value>Quick actions</value>
+  </data>
+  <data name="HomeShowOnStartup" xml:space="preserve">
+    <value>Show the home page at startup</value>
+  </data>
+  <data name="HomePin" xml:space="preserve">
+    <value>Add to favorites</value>
+  </data>
+  <data name="HomeUnpin" xml:space="preserve">
+    <value>Remove from favorites</value>
+  </data>
+  <data name="HomeRemoveRecent" xml:space="preserve">
+    <value>Remove from recent</value>
+  </data>
+  <data name="PaletteTitle" xml:space="preserve">
+    <value>Command Palette</value>
+  </data>
+  <data name="PalettePlaceholder" xml:space="preserve">
+    <value>Search connections and commands, or type a host to connect…</value>
+  </data>
+  <data name="PaletteGroupRecent" xml:space="preserve">
+    <value>Recent</value>
+  </data>
+  <data name="PaletteGroupCommands" xml:space="preserve">
+    <value>Commands</value>
+  </data>
+  <data name="PaletteQuickConnectTo" xml:space="preserve">
+    <value>Connect to {0}</value>
+  </data>
+  <data name="PaletteNoResults" xml:space="preserve">
+    <value>No results for “{0}”</value>
+  </data>
+  <data name="PaletteHintNavigate" xml:space="preserve">
+    <value>navigate</value>
+  </data>
+  <data name="PaletteHintOpen" xml:space="preserve">
+    <value>open</value>
+  </data>
+  <data name="PaletteHintClose" xml:space="preserve">
+    <value>close</value>
+  </data>
+  <data name="PaletteHintCommands" xml:space="preserve">
+    <value>commands only</value>
+  </data>
+  <data name="PaletteShowPanel" xml:space="preserve">
+    <value>Show panel: {0}</value>
+  </data>
+  <data name="PaletteSwitchToLight" xml:space="preserve">
+    <value>Switch to light theme</value>
+  </data>
+  <data name="PaletteSwitchToDark" xml:space="preserve">
+    <value>Switch to dark theme</value>
+  </data>
+  <data name="TimeJustNow" xml:space="preserve">
+    <value>just now</value>
+  </data>
+  <data name="TimeMinutesAgo" xml:space="preserve">
+    <value>{0} min ago</value>
+  </data>
+  <data name="TimeHoursAgo" xml:space="preserve">
+    <value>{0} h ago</value>
+  </data>
+  <data name="TimeYesterday" xml:space="preserve">
+    <value>yesterday</value>
+  </data>
+  <data name="TimeDaysAgo" xml:space="preserve">
+    <value>{0} days ago</value>
+  </data>
   <data name="GetConnectionInfoFromXmlFailed" xml:space="preserve">
     <value>An error occured while loading the connection entry for "{0}" from "{1}". {2}</value>
   </data>
