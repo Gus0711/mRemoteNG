@@ -164,18 +164,18 @@ namespace mRemoteNG.UI.Tabs
                         }
                         else
                         {
-                            ((InterfaceControl)Tag)?.Protocol.Close();
+                            (Tag as InterfaceControl)?.Protocol.Close();
                         }
                     }
                     else
                     {
                         // close without the confirmation prompt...
-                        ((InterfaceControl)Tag)?.Protocol.Close();
+                        (Tag as InterfaceControl)?.Protocol.Close();
                     }
                 }
                 else
                 {
-                    ((InterfaceControl)Tag)?.Protocol.Close();
+                    (Tag as InterfaceControl)?.Protocol.Close();
                 }
             }
 

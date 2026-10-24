@@ -215,8 +215,9 @@ namespace mRemoteNG.UI.Window
             {
                 foreach (IDockContent dockContent in connDock.DocumentsToArray())
                 {
-                    ConnectionTab tab = (ConnectionTab)dockContent;
-                    controlList.Add((InterfaceControl)tab.Tag);
+                    // Until its session has started, a tab's Tag is still the ConnectionInfo.
+                    if (dockContent is ConnectionTab { Tag: InterfaceControl interfaceControl })
+                        controlList.Add(interfaceControl);
                 }
 
                 foreach (InterfaceControl iControl in controlList)
