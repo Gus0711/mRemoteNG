@@ -1,68 +1,75 @@
 ﻿using System;
+using System.Drawing;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
-using mRemoteNG.Resources.Language;
+using mRemoteNG.Themes;
 
 namespace mRemoteNG.UI.Controls
 {
-    public class MrngSearchBox : MrngTextBox
+    /// <summary>
+    /// Borderless text box used inside the connection tree search panel.
+    /// Shows <see cref="CueText"/> as a placeholder (in the theme's secondary text color) while empty,
+    /// so the real <see cref="Control.Text"/> is always just what the user typed.
+    /// </summary>
+    [SupportedOSPlatform("windows")]
+    public class MrngSearchBox : TextBox
     {
-        private bool _showDefaultText = true;
-        private bool _settingDefaultText = true;
-        private readonly PictureBox _pbClear = new();
-        private readonly ToolTip _btClearToolTip = new();
+        private const int WM_PAINT = 0x000F;
+        private string _cueText = string.Empty;
 
         public MrngSearchBox()
         {
-            TextChanged += NGSearchBox_TextChanged;
-            LostFocus += FocusLost;
-            GotFocus += FocusGot;
-            AddClearButton();
-            ApplyLanguage();
+            BorderStyle = BorderStyle.None;
         }
 
-        private void ApplyLanguage()
+        /// <summary>Placeholder shown while the box is empty.</summary>
+        public string CueText
         {
-            _btClearToolTip.SetToolTip(_pbClear, Language.ClearSearchString);
-        }
-
-        private void AddClearButton()
-        {
-            _pbClear.Image = Properties.Resources.Close_16x;
-            _pbClear.Width = 20;
-            _pbClear.Dock = DockStyle.Right;
-            _pbClear.Cursor = Cursors.Default;
-            _pbClear.Click += PbClear_Click;
-            _pbClear.LostFocus += FocusLost;
-            Controls.Add(_pbClear);
-        }
-
-        private void FocusLost(object sender, EventArgs e)
-        {
-            if (!_showDefaultText)
-                return;
-
-            _settingDefaultText = true;
-            Text = Language.SearchPrompt;
-            _pbClear.Visible = false;
-        }
-
-        private void FocusGot(object sender, EventArgs e)
-        {
-            if (_showDefaultText)
-                Text = "";
-        }
-
-        private void PbClear_Click(object sender, EventArgs e) => Text = string.Empty;
-
-        private void NGSearchBox_TextChanged(object sender, EventArgs e)
-        {
-            if (!_settingDefaultText)
+            get => _cueText;
+            set
             {
-                _showDefaultText = string.IsNullOrEmpty(Text);
+                _cueText = value ?? string.Empty;
+                Invalidate();
             }
+        }
 
-            _pbClear.Visible = !_showDefaultText && TextLength > 0;
-            _settingDefaultText = false;
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+            if (m.Msg == WM_PAINT && TextLength == 0 && _cueText.Length > 0)
+                DrawCueText();
+        }
+
+        private void DrawCueText()
+        {
+            using Graphics g = CreateGraphics();
+            Color color = ModernPalette.Current.TextSecondary;
+            if (!ThemeManager.getInstance().ThemingActive)
+                color = SystemColors.GrayText;
+            // EM_GETMARGINS default left margin of a borderless edit is ~1px at 96 DPI
+            Rectangle bounds = ClientRectangle;
+            bounds.X += 1;
+            TextRenderer.DrawText(g, _cueText, Font, bounds, color, BackColor,
+                TextFormatFlags.Left | TextFormatFlags.Top | TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix | TextFormatFlags.NoPadding);
+        }
+
+        protected override void OnTextChanged(EventArgs e)
+        {
+            base.OnTextChanged(e);
+            if (TextLength == 0)
+                Invalidate();
+        }
+
+        protected override void OnGotFocus(EventArgs e)
+        {
+            base.OnGotFocus(e);
+            Parent?.Invalidate();
+        }
+
+        protected override void OnLostFocus(EventArgs e)
+        {
+            base.OnLostFocus(e);
+            Parent?.Invalidate();
         }
     }
 }
