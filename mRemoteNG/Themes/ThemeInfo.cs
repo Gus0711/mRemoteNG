@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.Versioning;
+using mRemoteNG.UI.Tabs;
 using WeifenLuo.WinFormsUI.Docking;
 
 
@@ -167,6 +168,14 @@ namespace mRemoteNG.Themes
         {
             _theme.Extender.DockPaneStripFactory = new MremoteDockPaneStripFactory();
             _theme.Extender.FloatWindowFactory = new MremoteFloatWindowFactory();
+
+            // Modern docking chrome: borderless panes, flat captions, hairline splitters.
+            _theme.Extender.DockPaneFactory = new ModernDockPaneFactory();
+            _theme.Extender.DockPaneCaptionFactory = new ModernDockPaneCaptionFactory();
+            _theme.Extender.DockPaneSplitterControlFactory = new ModernDockPaneSplitterControlFactory();
+            _theme.Extender.WindowSplitterControlFactory = new ModernWindowSplitterControlFactory();
+            _theme.Extender.AutoHideStripFactory = new MremoteNGAutoHideStripFactory();
+            MremoteNGThemeBase.ApplyModernMeasures(_theme);
         }
     }
 }
