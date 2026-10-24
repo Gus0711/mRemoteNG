@@ -70,11 +70,12 @@ namespace mRemoteNG.UI.Forms
             // 
             // btnOK
             // 
-            this.btnOK._mice = MrngButton.MouseState.HOVER;
+            this.btnOK._mice = MrngButton.MouseState.OUT;
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.Location = new System.Drawing.Point(215, 124);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(75, 23);
+            this.btnOK.Margin = new System.Windows.Forms.Padding(3, 12, 3, 3);
+            this.btnOK.Size = new System.Drawing.Size(88, 30);
             this.btnOK.TabIndex = 7;
             this.btnOK.Text = Language._Ok;
             this.btnOK.UseVisualStyleBackColor = true;
@@ -82,12 +83,13 @@ namespace mRemoteNG.UI.Forms
             // 
             // btnCancel
             // 
-            this.btnCancel._mice = MrngButton.MouseState.HOVER;
+            this.btnCancel._mice = MrngButton.MouseState.OUT;
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Location = new System.Drawing.Point(296, 124);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.Margin = new System.Windows.Forms.Padding(3, 12, 3, 3);
+            this.btnCancel.Size = new System.Drawing.Size(88, 30);
             this.btnCancel.TabIndex = 6;
             this.btnCancel.Text = Language._Cancel;
             this.btnCancel.UseVisualStyleBackColor = true;
@@ -111,6 +113,7 @@ namespace mRemoteNG.UI.Forms
             // 
             this.pbLock.Image = global::mRemoteNG.Properties.Resources.ASPWebSite_16x;
             this.pbLock.Location = new System.Drawing.Point(3, 12);
+            this.pbLock.Margin = new System.Windows.Forms.Padding(3, 3, 14, 3);
             this.pbLock.Name = "pbLock";
             this.tableLayoutPanel1.SetRowSpan(this.pbLock, 6);
             this.pbLock.Size = new System.Drawing.Size(64, 64);
@@ -125,6 +128,7 @@ namespace mRemoteNG.UI.Forms
             this.tableLayoutPanel1.SetColumnSpan(this.txtVerify, 2);
             this.txtVerify.Location = new System.Drawing.Point(73, 66);
             this.txtVerify.Name = "txtVerify";
+            this.txtVerify.Margin = new System.Windows.Forms.Padding(3, 4, 3, 3);
             this.txtVerify.Size = new System.Drawing.Size(298, 22);
             this.txtVerify.TabIndex = 4;
             this.txtVerify.UseSystemPasswordChar = true;
@@ -137,6 +141,7 @@ namespace mRemoteNG.UI.Forms
             this.tableLayoutPanel1.SetColumnSpan(this.txtPassword, 2);
             this.txtPassword.Location = new System.Drawing.Point(73, 25);
             this.txtPassword.Name = "txtPassword";
+            this.txtPassword.Margin = new System.Windows.Forms.Padding(3, 4, 3, 8);
             this.txtPassword.Size = new System.Drawing.Size(298, 22);
             this.txtPassword.TabIndex = 2;
             this.txtPassword.UseSystemPasswordChar = true;
@@ -159,6 +164,7 @@ namespace mRemoteNG.UI.Forms
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 0);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.Padding = new System.Windows.Forms.Padding(14, 6, 14, 10);
             this.tableLayoutPanel1.RowCount = 7;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 16.66667F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -167,7 +173,7 @@ namespace mRemoteNG.UI.Forms
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 83.33334F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(374, 150);
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(420, 170);
             this.tableLayoutPanel1.TabIndex = 8;
             // 
             // PasswordForm
@@ -176,7 +182,7 @@ namespace mRemoteNG.UI.Forms
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(374, 150);
+            this.ClientSize = new System.Drawing.Size(420, 170);
             this.ControlBox = false;
             this.Controls.Add(this.tableLayoutPanel1);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));

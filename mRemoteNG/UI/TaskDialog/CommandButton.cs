@@ -158,6 +158,13 @@ namespace mRemoteNG.UI.TaskDialog
         //--------------------------------------------------------------------------------
         protected override void OnCreateControl()
         {
+            // WinForms dark mode paints Standard buttons natively (OnPaint is skipped): use the Flat style.
+            if (_themeManager.ActiveAndExtended)
+            {
+                FlatStyle = FlatStyle.Flat;
+                SetStyle(ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
+            }
+
             base.OnCreateControl();
             imgArrow1 = Properties.Resources.GlyphRight_16x;
             imgArrow2 = Properties.Resources.GlyphRight_16x;
@@ -172,90 +179,64 @@ namespace mRemoteNG.UI.TaskDialog
                 return;
             }
 
-            e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
-            e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-
-            const LinearGradientMode mode = LinearGradientMode.Vertical;
-
-            Rectangle newRect = new(ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width - 1,
-                                        ClientRectangle.Height - 1);
-
-            Image img = imgArrow1;
-
+            // Fluent "command link": rounded surface, accent arrow, title + secondary description.
+            mRemoteNG.UI.Controls.ModernControlColors c = mRemoteNG.UI.Controls.ModernControlColors.Current;
+            Graphics g = e.Graphics;
+            g.Clear(mRemoteNG.UI.Controls.ModernControlColors.ParentBackground(this));
 
             Color back;
-            Color fore;
             Color border;
-            if (Enabled)
+            if (!Enabled)
             {
-                switch (m_State)
+                back = c.SurfaceDisabled;
+                border = mRemoteNG.UI.GraphicsUtilities.ModernGraphics.Blend(c.Border, c.Background, 0.4f);
+            }
+            else
+            {
+                back = m_State switch
                 {
-                    case eButtonState.MouseOver:
-                        back = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Hover_Background");
-                        fore = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Hover_Foreground");
-                        border = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Hover_Border");
-                        break;
-                    case eButtonState.Down:
-                        back = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Pressed_Background");
-                        fore = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Pressed_Foreground");
-                        border = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Pressed_Border");
-                        break;
-                    default:
-                        back = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Background");
-                        fore = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Foreground");
-                        border = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Border");
-                        break;
-                }
-            }
-            else
-            {
-                back = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Disabled_Background");
-                fore = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Disabled_Foreground");
-                border = _themeManager.ActiveTheme.ExtendedPalette.getColor("Button_Disabled_Border");
+                    eButtonState.MouseOver => c.SurfaceHover,
+                    eButtonState.Down => c.SurfacePressed,
+                    _ => c.Surface
+                };
+                border = m_State == eButtonState.MouseOver ? c.BorderHover : c.Border;
             }
 
-            if (Enabled)
-            {
-                e.Graphics.FillRectangle(new SolidBrush(back), newRect);
-                e.Graphics.DrawRectangle(new Pen(border, 1), newRect);
-            }
-            else
-            {
-                LinearGradientBrush brush = new(newRect, back, back, mode);
-                e.Graphics.FillRectangle(brush, newRect);
-                e.Graphics.DrawRectangle(new Pen(border, 1), newRect);
-            }
+            float radius = mRemoteNG.UI.Controls.ModernControlColors.Scale(this, mRemoteNG.Themes.ModernPalette.CornerRadius);
+            RectangleF bounds = new(0, 0, Width, Height);
+            mRemoteNG.UI.GraphicsUtilities.ModernGraphics.FillRoundedRectangle(g, back, bounds, radius);
+            mRemoteNG.UI.GraphicsUtilities.ModernGraphics.DrawRoundedRectangle(g, border, bounds, radius);
 
+            Color fore = Enabled ? c.Text : c.TextDisabled;
+            Color secondary = Enabled ? c.TextSecondary : c.TextDisabled;
             string largetext = GetLargeText();
             string smalltext = GetSmallText();
-
             SizeF szL = GetLargeTextSizeF();
-            //e.Graphics.DrawString(largetext, base.Font, new SolidBrush(text_color), new RectangleF(new PointF(LEFT_MARGIN + imgArrow1.Width + 5, TOP_MARGIN), szL));
-            TextRenderer.DrawText(e.Graphics, largetext, Font,
-                                  new Rectangle(LEFT_MARGIN + imgArrow1.Width + 5, TOP_MARGIN, (int)szL.Width,
-                                                (int)szL.Height), fore,
-                                  TextFormatFlags.Default);
+
+            int arrow = mRemoteNG.UI.Controls.ModernControlColors.Scale(this, 16);
+            Rectangle arrowRect = new(LEFT_MARGIN, TOP_MARGIN + (int)(szL.Height / 2) - arrow / 2, arrow, arrow);
+            FluentIcons.Draw(g, '', arrowRect, Enabled ? c.Accent : c.TextDisabled, arrow * 0.85f);
+
+            TextRenderer.DrawText(g, largetext, Font,
+                                  new Rectangle(LEFT_MARGIN + imgArrow1.Width + 5, TOP_MARGIN, (int)szL.Width + 2,
+                                                (int)szL.Height), fore, TextFormatFlags.Default);
 
             if (smalltext != "")
             {
                 SizeF szS = GetSmallTextSizeF();
-                e.Graphics.DrawString(smalltext, SmallFont, new SolidBrush(fore),
-                                      new
-                                          RectangleF(new PointF(LEFT_MARGIN + imgArrow1.Width + 8, TOP_MARGIN + (int)szL.Height),
-                                                     szS));
+                using SolidBrush smallBrush = new(secondary);
+                g.DrawString(smalltext, SmallFont, smallBrush,
+                             new RectangleF(new PointF(LEFT_MARGIN + imgArrow1.Width + 8, TOP_MARGIN + (int)szL.Height), szS));
             }
 
-            e.Graphics.DrawImage(img, new Point(LEFT_MARGIN, TOP_MARGIN + (int)(szL.Height / 2) - img.Height / 2));
-
-            // Draw focus rectangle if button has focus
-            if (Focused && Enabled)
+            if (Focused && Enabled && ShowFocusCues)
             {
-                Rectangle focusRect = new(newRect.X + 2, newRect.Y + 2, newRect.Width - 4, newRect.Height - 4);
-                ControlPaint.DrawFocusRectangle(e.Graphics, focusRect);
+                float inset = mRemoteNG.UI.Controls.ModernControlColors.Scale(this, 2);
+                mRemoteNG.UI.GraphicsUtilities.ModernGraphics.DrawRoundedRectangle(g, c.Accent, RectangleF.Inflate(bounds, -inset, -inset),
+                                                                      Math.Max(1, radius - inset));
             }
         }
 
-        //--------------------------------------------------------------------------------
         protected override void OnMouseLeave(EventArgs e)
         {
             m_State = eButtonState.Normal;

@@ -41,17 +41,17 @@ namespace mRemoteNG.UI.Forms
             this.cbPanels._mice = MrngComboBox.MouseState.HOVER;
             this.cbPanels.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbPanels.FormattingEnabled = true;
-            this.cbPanels.Location = new System.Drawing.Point(12, 42);
+            this.cbPanels.Location = new System.Drawing.Point(16, 52);
             this.cbPanels.Name = "cbPanels";
-            this.cbPanels.Size = new System.Drawing.Size(224, 21);
+            this.cbPanels.Size = new System.Drawing.Size(308, 21);
             this.cbPanels.TabIndex = 10;
             // 
             // btnOK
             // 
             this.btnOK._mice = MrngButton.MouseState.HOVER;
-            this.btnOK.Location = new System.Drawing.Point(167, 72);
+            this.btnOK.Location = new System.Drawing.Point(236, 94);
             this.btnOK.Name = "btnOK";
-            this.btnOK.Size = new System.Drawing.Size(75, 24);
+            this.btnOK.Size = new System.Drawing.Size(88, 30);
             this.btnOK.TabIndex = 20;
             this.btnOK.Text = Language._Ok;
             this.btnOK.UseVisualStyleBackColor = true;
@@ -59,9 +59,9 @@ namespace mRemoteNG.UI.Forms
             // 
             // lblDescription
             // 
-            this.lblDescription.Location = new System.Drawing.Point(7, 8);
+            this.lblDescription.Location = new System.Drawing.Point(14, 10);
             this.lblDescription.Name = "lblDescription";
-            this.lblDescription.Size = new System.Drawing.Size(229, 29);
+            this.lblDescription.Size = new System.Drawing.Size(312, 36);
             this.lblDescription.TabIndex = 0;
             this.lblDescription.Text = "Select a panel from the list below or click New to add a new one. Click OK to con" +
     "tinue.";
@@ -71,9 +71,9 @@ namespace mRemoteNG.UI.Forms
             this.btnNew._mice = MrngButton.MouseState.HOVER;
             this.btnNew.Image = global::mRemoteNG.Properties.Resources.InsertPanel_16x;
             this.btnNew.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnNew.Location = new System.Drawing.Point(86, 72);
+            this.btnNew.Location = new System.Drawing.Point(124, 94);
             this.btnNew.Name = "btnNew";
-            this.btnNew.Size = new System.Drawing.Size(75, 24);
+            this.btnNew.Size = new System.Drawing.Size(106, 30);
             this.btnNew.TabIndex = 40;
             this.btnNew.Text = Language._New;
             this.btnNew.UseVisualStyleBackColor = true;
@@ -84,7 +84,7 @@ namespace mRemoteNG.UI.Forms
             this.AcceptButton = this.btnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-            this.ClientSize = new System.Drawing.Size(245, 107);
+            this.ClientSize = new System.Drawing.Size(340, 138);
             this.Controls.Add(this.lblDescription);
             this.Controls.Add(this.btnNew);
             this.Controls.Add(this.btnOK);

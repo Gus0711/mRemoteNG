@@ -30,16 +30,16 @@
         {
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.labelExceptionCaught = new System.Windows.Forms.Label();
-            this.buttonClose = new System.Windows.Forms.Button();
-            this.textBoxStackTrace = new System.Windows.Forms.TextBox();
+            this.buttonClose = new mRemoteNG.UI.Controls.MrngButton();
+            this.textBoxStackTrace = new mRemoteNG.UI.Controls.MrngTextBox();
             this.labelStackTraceHeader = new System.Windows.Forms.Label();
             this.labelExceptionMessageHeader = new System.Windows.Forms.Label();
-            this.textBoxExceptionMessage = new System.Windows.Forms.TextBox();
-            this.buttonCopyAll = new System.Windows.Forms.Button();
+            this.textBoxExceptionMessage = new mRemoteNG.UI.Controls.MrngTextBox();
+            this.buttonCopyAll = new mRemoteNG.UI.Controls.MrngButton();
             this.labelExceptionIsFatalHeader = new System.Windows.Forms.Label();
             this.labelEnvironment = new System.Windows.Forms.Label();
-            this.textBoxEnvironment = new System.Windows.Forms.TextBox();
-            this.buttonCreateBug = new System.Windows.Forms.Button();
+            this.textBoxEnvironment = new mRemoteNG.UI.Controls.MrngTextBox();
+            this.buttonCreateBug = new mRemoteNG.UI.Controls.MrngButton();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -227,16 +227,16 @@
         #endregion
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.TextBox textBoxStackTrace;
-        private System.Windows.Forms.Button buttonClose;
+        private mRemoteNG.UI.Controls.MrngTextBox textBoxStackTrace;
+        private mRemoteNG.UI.Controls.MrngButton buttonClose;
         private System.Windows.Forms.Label labelExceptionCaught;
         private System.Windows.Forms.Label labelStackTraceHeader;
         private System.Windows.Forms.Label labelExceptionMessageHeader;
-        private System.Windows.Forms.TextBox textBoxExceptionMessage;
-        private System.Windows.Forms.Button buttonCopyAll;
+        private mRemoteNG.UI.Controls.MrngTextBox textBoxExceptionMessage;
+        private mRemoteNG.UI.Controls.MrngButton buttonCopyAll;
         private System.Windows.Forms.Label labelExceptionIsFatalHeader;
         private System.Windows.Forms.Label labelEnvironment;
-        private System.Windows.Forms.TextBox textBoxEnvironment;
-        private System.Windows.Forms.Button buttonCreateBug;
+        private mRemoteNG.UI.Controls.MrngTextBox textBoxEnvironment;
+        private mRemoteNG.UI.Controls.MrngButton buttonCreateBug;
     }
 }
