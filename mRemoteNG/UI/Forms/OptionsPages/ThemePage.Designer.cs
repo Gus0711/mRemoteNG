@@ -38,7 +38,7 @@ namespace mRemoteNG.UI.Forms.OptionsPages
         {
             btnThemeDelete = new MrngButton();
             btnThemeNew = new MrngButton();
-            cboTheme = new ComboBox();
+            cboTheme = new MrngComboBox();
             listPalette = new MrngListView();
             keyCol = new BrightIdeasSoftware.OLVColumn();
             ColorCol = new BrightIdeasSoftware.OLVColumn();
@@ -205,7 +205,7 @@ namespace mRemoteNG.UI.Forms.OptionsPages
 
         internal MrngButton btnThemeDelete;
         internal MrngButton btnThemeNew;
-        internal ComboBox cboTheme;
+        internal MrngComboBox cboTheme;
         private Controls.MrngListView listPalette;
         private Controls.MrngLabel labelRestart;
         private BrightIdeasSoftware.OLVColumn keyCol;
