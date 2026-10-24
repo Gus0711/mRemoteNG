@@ -241,6 +241,7 @@ namespace mRemoteNG.Connection
                 connectionInfoOriginal.OpenConnections.Add(newProtocol);
                 _activeConnections.Add(connectionInfo.ConstantID);
                 FrmMain.Default.SelectedConnection = connectionInfo;
+                RecentConnections.Instance.Record(connectionInfoOriginal);
             }
             catch (Exception ex)
             {
