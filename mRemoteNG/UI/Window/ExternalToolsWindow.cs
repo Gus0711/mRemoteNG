@@ -8,6 +8,7 @@ using mRemoteNG.Tools;
 using WeifenLuo.WinFormsUI.Docking;
 using mRemoteNG.UI.Forms;
 using mRemoteNG.Themes;
+using mRemoteNG.UI.Controls.ConnectionTree;
 using mRemoteNG.Tools.CustomCollections;
 using mRemoteNG.Resources.Language;
 using System.Runtime.Versioning;
@@ -121,6 +122,26 @@ namespace mRemoteNG.UI.Window
             PropertiesGroupBox.BackColor =
                 _themeManager.ActiveTheme.Theme.ColorPalette.CommandBarMenuDefault.Background;
             PropertiesGroupBox.ForeColor = _themeManager.ActiveTheme.Theme.ColorPalette.CommandBarMenuDefault.Text;
+            ApplyModernListStyle();
+        }
+
+        /// <summary>
+        /// Fluent glyphs on the toolbar, taller rows and theme-matching scroll bars for the tool list.
+        /// </summary>
+        private void ApplyModernListStyle()
+        {
+            if (!_themeManager.ActiveAndExtended) return;
+
+            ModernPalette palette = ModernPalette.Current;
+            int iconSize = (int)Math.Round(16 * ToolStrip.DeviceDpi / 96f);
+            NewToolToolstripButton.Image = FluentIcons.Get(FluentIcons.Add, iconSize, palette.Accent);
+            DeleteToolToolstripButton.Image = FluentIcons.Get(FluentIcons.Delete, iconSize, palette.Danger);
+            LaunchToolToolstripButton.Image = FluentIcons.Get(FluentIcons.Play, iconSize, palette.Success);
+            foreach (ToolStripItem item in new ToolStripItem[] { NewToolToolstripButton, DeleteToolToolstripButton, LaunchToolToolstripButton })
+                item.ImageScaling = ToolStripItemImageScaling.None;
+
+            ToolsListObjView.RowHeight = (int)Math.Round(26 * ToolsListObjView.DeviceDpi / 96f);
+            NativeScrollBarTheme.Apply(ToolsListObjView);
         }
 
         private void UpdateToolsListObjView()
