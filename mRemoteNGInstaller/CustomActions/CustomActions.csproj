@@ -46,6 +46,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Must sit next to the assembly so MakeSfxCA packs it: without it the custom action host
+         cannot pick a CLR and every custom action fails with 1603 (SFXCA error 0x80131700). -->
+    <Content Include="CustomAction.config" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="WixToolset.Dtf.CustomAction" />
     <PackageReference Include="WixToolset.Dtf.WindowsInstaller" />
   </ItemGroup>
