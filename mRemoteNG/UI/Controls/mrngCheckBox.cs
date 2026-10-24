@@ -1,33 +1,26 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Runtime.Versioning;
 using System.Windows.Forms;
 using mRemoteNG.Themes;
+using mRemoteNG.UI.GraphicsUtilities;
 
 namespace mRemoteNG.UI.Controls
 {
     [SupportedOSPlatform("windows")]
-    //Extended CheckBox class, the NGCheckBox onPaint completely repaint the control
-
-    //
-    // If this causes design issues in the future, may want to think about migrating to
-    // CheckBoxRenderer:
-    // https://docs.microsoft.com/en-us/dotnet/api/system.windows.forms.checkboxrenderer?view=netframework-4.6
-    //
+    // Fluent style check box: rounded square, accent fill with a white check mark when checked.
     public class MrngCheckBox : CheckBox
     {
-        private ThemeManager _themeManager;
-        private readonly Size _checkboxSize;
-        private readonly int _checkboxYCoord;
-        private readonly int _textXCoord;
+        private const int BoxLogicalSize = 14;
+        private const int GapLogicalSize = 6;
 
         public MrngCheckBox()
         {
             InitializeComponent();
-            ThemeManager.getInstance().ThemeChanged += OnCreateControl;
-            DisplayProperties display = new();
-            _checkboxSize = new Size(display.ScaleWidth(11), display.ScaleHeight(11));
-            _checkboxYCoord = (display.ScaleHeight(Height) - _checkboxSize.Height) / 2 - display.ScaleHeight(5);
-            _textXCoord = _checkboxSize.Width + display.ScaleWidth(2);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.ResizeRedraw, true);
+            ThemeManager.getInstance().ThemeChanged += OnThemeChanged;
         }
 
         public enum MouseState
@@ -37,107 +30,193 @@ namespace mRemoteNG.UI.Controls
             OUT
         }
 
+        // ReSharper disable once InconsistentNaming
         public MouseState _mice { get; set; }
 
+        private bool CustomPainted =>
+            ModernControlColors.Enabled && Appearance == Appearance.Normal && RightToLeft != RightToLeft.Yes;
 
-        protected override void OnCreateControl()
+        private void OnThemeChanged()
         {
-            base.OnCreateControl();
-            _themeManager = ThemeManager.getInstance();
-            if (!_themeManager.ThemingActive) return;
-            _mice = MouseState.OUT;
-            MouseEnter += (sender, args) =>
-            {
-                _mice = MouseState.HOVER;
-                Invalidate();
-            };
-            MouseLeave += (sender, args) =>
-            {
-                _mice = MouseState.OUT;
-                Invalidate();
-            };
-            MouseDown += (sender, args) =>
-            {
-                if (args.Button != MouseButtons.Left) return;
-                _mice = MouseState.DOWN;
-                Invalidate();
-            };
-            MouseUp += (sender, args) =>
-            {
-                _mice = MouseState.OUT;
-
-                Invalidate();
-            };
-
+            if (IsDisposed) return;
+            SyncPaintMode();
             Invalidate();
         }
 
+        protected override void OnCreateControl()
+        {
+            SyncPaintMode();
+            base.OnCreateControl();
+        }
+
+        // WinForms dark mode (Application.SetColorMode) renders Standard buttons natively and skips OnPaint:
+        // use the Flat style (always user painted) while the modern look is active.
+        private void SyncPaintMode()
+        {
+            FlatStyle wanted = ModernControlColors.Enabled ? FlatStyle.Flat : FlatStyle.Standard;
+            if (FlatStyle != wanted && FlatStyle != FlatStyle.System)
+                FlatStyle = wanted;
+            SetStyle(ControlStyles.UserPaint, true);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                ThemeManager.getInstance().ThemeChanged -= OnThemeChanged;
+            base.Dispose(disposing);
+        }
+
+        protected override void OnMouseEnter(EventArgs eventargs)
+        {
+            _mice = MouseState.HOVER;
+            Invalidate();
+            base.OnMouseEnter(eventargs);
+        }
+
+        protected override void OnMouseLeave(EventArgs eventargs)
+        {
+            _mice = MouseState.OUT;
+            Invalidate();
+            base.OnMouseLeave(eventargs);
+        }
+
+        protected override void OnMouseDown(MouseEventArgs mevent)
+        {
+            if (mevent.Button == MouseButtons.Left)
+            {
+                _mice = MouseState.DOWN;
+                Invalidate();
+            }
+
+            base.OnMouseDown(mevent);
+        }
+
+        protected override void OnMouseUp(MouseEventArgs mevent)
+        {
+            _mice = ClientRectangle.Contains(mevent.Location) ? MouseState.HOVER : MouseState.OUT;
+            Invalidate();
+            base.OnMouseUp(mevent);
+        }
+
+        public override Size GetPreferredSize(Size proposedSize)
+        {
+            Size size = base.GetPreferredSize(proposedSize);
+            if (!CustomPainted || !AutoSize) return size;
+            // glyph + gap + text, measured the way OnPaint draws it
+            TextFormatFlags flags = TextFormatFlags.SingleLine | (ShowKeyboardCues ? 0 : TextFormatFlags.HidePrefix);
+            Size text = TextRenderer.MeasureText(Text ?? string.Empty, Font, Size.Empty, flags);
+            int glyph = ModernControlColors.Scale(this, BoxLogicalSize);
+            int width = glyph + ModernControlColors.Scale(this, GapLogicalSize) + text.Width + 2 + Padding.Horizontal;
+            int height = System.Math.Max(size.Height, glyph + 2);
+            return new Size(System.Math.Max(width, size.Width), height);
+        }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (!_themeManager.ActiveAndExtended)
+            if (!CustomPainted)
             {
                 base.OnPaint(e);
                 return;
             }
 
-            //Get the colors
-            Color fore;
-            Color glyph;
-            Color checkBorder;
+            ModernControlColors c = ModernControlColors.Current;
+            Graphics g = e.Graphics;
+            g.Clear(BackColor.A == 255 ? BackColor : ModernControlColors.ParentBackground(this));
 
-            Color back = _themeManager.ActiveTheme.ExtendedPalette.getColor("CheckBox_Background");
-            if (Enabled)
+            int box = ModernControlColors.Scale(this, BoxLogicalSize);
+            int gap = ModernControlColors.Scale(this, GapLogicalSize);
+            int lineHeight = Math.Max(Font.Height, box);
+            bool multiLine = Height >= lineHeight * 2;
+            int boxY = multiLine ? Padding.Top + (Font.Height - box) / 2 + 1 : (Height - box) / 2;
+            boxY = Math.Max(0, boxY);
+            RectangleF boxRect = new(1, boxY, box, box);
+
+            DrawGlyph(g, c, boxRect, CheckState, Enabled, _mice, ModernControlColors.DpiScale(this));
+
+            Rectangle textRect = new(box + gap + 1, 0, Math.Max(0, Width - box - gap - 1), Height);
+            TextFormatFlags flags = TextFormatFlags.Left | TextFormatFlags.EndEllipsis;
+            flags |= multiLine ? TextFormatFlags.WordBreak | TextFormatFlags.Top : TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine;
+            if (multiLine) textRect.Y = Padding.Top;
+            if (!ShowKeyboardCues) flags |= TextFormatFlags.HidePrefix;
+            TextRenderer.DrawText(g, Text, Font, textRect, Enabled ? c.Text : c.TextDisabled, flags);
+
+            if (Focused && ShowFocusCues)
             {
-                glyph = _themeManager.ActiveTheme.ExtendedPalette.getColor("CheckBox_Glyph");
-                fore = _themeManager.ActiveTheme.ExtendedPalette.getColor("CheckBox_Text");
-                // ReSharper disable once SwitchStatementMissingSomeCases
-                switch (_mice)
+                float inset = ModernControlColors.Scale(this, 2);
+                RectangleF ring = RectangleF.Inflate(boxRect, inset, inset);
+                ring.Intersect(new RectangleF(0, 0, Width, Height));
+                ModernGraphics.DrawRoundedRectangle(g, c.Text, ring, ModernControlColors.Scale(this, 5));
+            }
+        }
+
+        internal static void DrawGlyph(Graphics g, ModernControlColors c, RectangleF boxRect, CheckState state,
+                                       bool enabled, MouseState mouse, float scale)
+        {
+            float radius = 3.5f * scale;
+            bool on = state != CheckState.Unchecked;
+
+            if (on)
+            {
+                Color fill = !enabled
+                    ? ModernGraphics.Blend(c.Accent, c.Background, 0.6f)
+                    : mouse switch
+                    {
+                        MouseState.HOVER => c.AccentHover,
+                        MouseState.DOWN => c.AccentPressed,
+                        _ => c.Accent
+                    };
+                ModernGraphics.FillRoundedRectangle(g, fill, boxRect, radius);
+
+                Color mark = enabled ? c.AccentText : ModernGraphics.Blend(c.AccentText, c.Background, 0.3f);
+                SmoothingMode previous = g.SmoothingMode;
+                g.SmoothingMode = SmoothingMode.AntiAlias;
+                using Pen pen = new(mark, Math.Max(1.4f, boxRect.Width * 0.11f))
                 {
-                    case MouseState.HOVER:
-                        checkBorder = _themeManager.ActiveTheme.ExtendedPalette.getColor("CheckBox_Border_Hover");
-                        break;
-                    case MouseState.DOWN:
-                        checkBorder = _themeManager.ActiveTheme.ExtendedPalette.getColor("CheckBox_Border_Pressed");
-                        break;
-                    default:
-                        checkBorder = _themeManager.ActiveTheme.ExtendedPalette.getColor("CheckBox_Border");
-                        break;
+                    StartCap = LineCap.Round,
+                    EndCap = LineCap.Round,
+                    LineJoin = LineJoin.Round
+                };
+                float x = boxRect.X, y = boxRect.Y, w = boxRect.Width;
+                if (state == CheckState.Indeterminate)
+                {
+                    g.DrawLine(pen, x + w * 0.28f, y + w * 0.5f, x + w * 0.72f, y + w * 0.5f);
                 }
+                else
+                {
+                    g.DrawLines(pen, new[]
+                    {
+                        new PointF(x + w * 0.25f, y + w * 0.52f),
+                        new PointF(x + w * 0.42f, y + w * 0.69f),
+                        new PointF(x + w * 0.76f, y + w * 0.33f)
+                    });
+                }
+
+                g.SmoothingMode = previous;
             }
             else
             {
-                fore = _themeManager.ActiveTheme.ExtendedPalette.getColor("CheckBox_Text_Disabled");
-                glyph = _themeManager.ActiveTheme.ExtendedPalette.getColor("CheckBox_Glyph_Disabled");
-                checkBorder = _themeManager.ActiveTheme.ExtendedPalette.getColor("CheckBox_Border_Disabled");
+                Color fill = !enabled
+                    ? c.InputBackgroundDisabled
+                    : mouse switch
+                    {
+                        MouseState.HOVER => c.SurfaceHover,
+                        MouseState.DOWN => c.SurfacePressed,
+                        _ => c.InputBackground
+                    };
+                Color stroke = !enabled
+                    ? ModernGraphics.Blend(c.ControlStroke, c.Background, 0.55f)
+                    : mouse == MouseState.OUT ? c.ControlStroke : c.Text;
+                ModernGraphics.FillRoundedRectangle(g, fill, boxRect, radius);
+                ModernGraphics.DrawRoundedRectangle(g, stroke, boxRect, radius, Math.Max(1f, scale));
             }
-
-            e.Graphics.Clear(Parent.BackColor);
-
-            using (Pen p = new(checkBorder))
-            {
-                Rectangle boxRect = new(0, _checkboxYCoord, _checkboxSize.Width, _checkboxSize.Height);
-                e.Graphics.FillRectangle(new SolidBrush(back), boxRect);
-                e.Graphics.DrawRectangle(p, boxRect);
-            }
-
-            if (Checked)
-            {
-                // | \uE001 | &#xE001; |  |  is the tick/check mark and it exists in Segoe UI Symbol at least...
-                e.Graphics.DrawString("\uE001", new Font("Segoe UI Symbol", 7.75f), new SolidBrush(glyph), -4, 0);
-            }
-
-            Rectangle textRect = new(_textXCoord, 0, Width - 16, Height);
-            TextRenderer.DrawText(e.Graphics, Text, Font, textRect, fore, Parent.BackColor,
-                                  TextFormatFlags.PathEllipsis);
         }
 
         private void InitializeComponent()
         {
             SuspendLayout();
-            // 
+            //
             // NGCheckBox
-            // 
+            //
             Font = new Font("Segoe UI", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
             ResumeLayout(false);
         }
