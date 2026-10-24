@@ -188,7 +188,7 @@ namespace mRemoteNG.UI.Controls
 
             int textHeight = _textBox.PreferredHeight;
             int textRight = Math.Max(left + Scale(20), right - Scale(4));
-            _textBox.SetBounds(left, (Height - textHeight) / 2 + 1, textRight - left, textHeight);
+            _textBox.SetBounds(left, (Height - textHeight) / 2, textRight - left, textHeight);
         }
 
         #endregion
@@ -226,7 +226,7 @@ namespace mRemoteNG.UI.Controls
             {
                 int size = Scale(16);
                 Rectangle glyphBounds = new(Scale(10), (Height - size) / 2, size, size);
-                FluentIcons.Draw(g, _leadingGlyph.Value, glyphBounds, focused ? palette.Accent : palette.TextSecondary, Scale(14));
+                ModernToolStripRenderer.DrawGlyph(g, _leadingGlyph.Value, glyphBounds, focused ? palette.Accent : palette.TextSecondary, Scale(14));
             }
 
             foreach (TrailingButton button in _trailingButtons)
@@ -251,14 +251,14 @@ namespace mRemoteNG.UI.Controls
             int x = r.Left + Scale(8);
             if (!isText && !button.ShowChevron && button.Glyph.HasValue)
             {
-                FluentIcons.Draw(g, button.Glyph.Value, r, fore, Scale(13));
+                ModernToolStripRenderer.DrawGlyph(g, button.Glyph.Value, r, fore, Scale(13));
                 return;
             }
 
             if (button.Glyph.HasValue)
             {
                 int size = Scale(14);
-                FluentIcons.Draw(g, button.Glyph.Value, new Rectangle(x, r.Top + (r.Height - size) / 2, size, size), fore, Scale(13));
+                ModernToolStripRenderer.DrawGlyph(g, button.Glyph.Value, new Rectangle(x, r.Top + (r.Height - size) / 2, size, size), fore, Scale(13));
                 x += size + Scale(6);
             }
 
@@ -274,7 +274,7 @@ namespace mRemoteNG.UI.Controls
             if (button.ShowChevron)
             {
                 int size = Scale(12);
-                FluentIcons.Draw(g, ChevronDownSmallGlyph, new Rectangle(x, r.Top + (r.Height - size) / 2, size, size), fore, Scale(9));
+                ModernToolStripRenderer.DrawGlyph(g, ChevronDownSmallGlyph, new Rectangle(x, r.Top + (r.Height - size) / 2, size, size), fore, Scale(9));
             }
         }
 

@@ -74,6 +74,8 @@ namespace mRemoteNG.UI.Controls
         public ConnectionContextMenu(ConnectionTree.ConnectionTree connectionTree)
         {
             _connectionTree = connectionTree;
+            // Make sure the Modern themes hand out the modern renderer before the tree window styles this menu.
+            ModernToolStripRenderer.InstallIntoModernThemes();
             InitializeComponent();
             ApplyLanguage();
             EnableShortcutKeys();

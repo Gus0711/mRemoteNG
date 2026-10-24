@@ -125,6 +125,37 @@ namespace mRemoteNG.UI
 
         private static ModernPalette Palette => ModernPalette.Current;
 
+        private static readonly Lazy<FontFamily> IconFontFamily = new(() => new FontFamily(FluentIcons.FontFamily));
+
+        /// <summary>
+        /// Draws an icon-font glyph with its ink optically centered in <paramref name="bounds"/> (the icon fonts'
+        /// asymmetric ascent/descent otherwise renders glyphs a few pixels low next to text).
+        /// </summary>
+        public static void DrawGlyph(Graphics g, char glyph, RectangleF bounds, Color color, float emSize)
+        {
+            if (bounds.Width <= 0 || bounds.Height <= 0 || emSize <= 0)
+                return;
+
+            using GraphicsPath path = new();
+            path.AddString(glyph.ToString(), IconFontFamily.Value, (int)FontStyle.Regular, emSize, PointF.Empty, StringFormat.GenericTypographic);
+            RectangleF ink = path.GetBounds();
+            if (ink.Width <= 0 || ink.Height <= 0)
+                return;
+
+            // Center the em box horizontally and the ink vertically, snapped to whole pixels for crispness.
+            float dx = (float)Math.Round(bounds.X + (bounds.Width - ink.Width) / 2f - ink.X);
+            float dy = (float)Math.Round(bounds.Y + (bounds.Height - ink.Height) / 2f - ink.Y);
+            using Matrix matrix = new();
+            matrix.Translate(dx, dy);
+            path.Transform(matrix);
+
+            SmoothingMode previous = g.SmoothingMode;
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            using SolidBrush brush = new(color);
+            g.FillPath(brush, path);
+            g.SmoothingMode = previous;
+        }
+
         private static int Scale(ToolStrip? toolStrip, int logical) =>
             (int)Math.Round(logical * (toolStrip?.DeviceDpi ?? 96) / 96f);
 
@@ -393,7 +424,7 @@ namespace mRemoteNG.UI
 
             int box = Math.Max(emSize + 4, Math.Min(area.Width, area.Height));
             Rectangle target = new(area.X + (area.Width - box) / 2, area.Y + (area.Height - box) / 2, box, box);
-            FluentIcons.Draw(g, glyph, target, color, emSize);
+            DrawGlyph(g, glyph, target, color, emSize);
         }
 
         protected override void OnRenderItemCheck(ToolStripItemImageRenderEventArgs e)
@@ -416,7 +447,8 @@ namespace mRemoteNG.UI
 
             Color color = !item.Enabled ? palette.TextDisabled : palette.IsDark ? palette.AccentHover : palette.Accent;
             int size = Math.Min(area.Width, area.Height);
-            FluentIcons.Draw(e.Graphics, CheckMarkGlyph, area, color, size * 0.85f);
+            area.Offset(0, -Scale(item, 1));
+            DrawGlyph(e.Graphics, CheckMarkGlyph, area, color, size * 0.85f);
         }
 
         #endregion
@@ -434,7 +466,9 @@ namespace mRemoteNG.UI
 
                 Color color = GlyphColor(item, glyph.Role);
                 int size = Math.Min(area.Width, area.Height);
-                FluentIcons.Draw(e.Graphics, glyph.Glyph, area, color, size);
+                if (item.IsOnDropDown)
+                    area.Offset(0, -Scale(item, 1));
+                DrawGlyph(e.Graphics, glyph.Glyph, area, color, size);
                 return;
             }
 
@@ -477,6 +511,14 @@ namespace mRemoteNG.UI
                 color = palette.Text;
 
             e.TextColor = color;
+            if (item.IsOnDropDown)
+            {
+                // Optical alignment with the icons: the line box centers the descenders, nudge the text down.
+                Rectangle textRectangle = e.TextRectangle;
+                textRectangle.Offset(0, Scale(item, 1));
+                e.TextRectangle = textRectangle;
+            }
+
             base.OnRenderItemText(e);
         }
 
