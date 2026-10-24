@@ -9,14 +9,62 @@
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
-        Height="120"
-        Width="450">
-    <Border CornerRadius="10" BorderBrush="#211E1B" BorderThickness="1" Background="#373C42">
-        <Grid>
-            <Label Name="lblLogoPartA" Content="m" HorizontalAlignment="Left" VerticalAlignment="Top" Height="59" Margin="104,0,0,0" Width="40" FontFamily="HandelGotDBol" FontSize="40" Foreground="#5289F9"/>
-            <Label Name="lblLogoPartB" Content="RemoteNG" HorizontalAlignment="Left" VerticalAlignment="Top" Height="59" Margin="134,0,0,0" Width="210" FontFamily="HandelGotDBol" FontSize="40" Foreground="#E8EBEE" RenderTransformOrigin="0.548,0.525"/>
-            <Label Name="lblLogoPartC" Content="Multi-Remote Next Generation Connection Manager" HorizontalAlignment="Center" VerticalAlignment="Top" Height="30" Margin="0,83,0,0" Width="410" FontFamily="Segoe" FontSize="16" Foreground="#E8EBEE" FontWeight="Bold"/>
-            <Label Name="lblLogoPartD" Content="v.?.??.?" HorizontalAlignment="Center" VerticalAlignment="Top" Height="28" Margin="0,50,0,0" Width="442" FontFamily="Segoe" FontSize="16" Foreground="#E8EBEE"/>
+        ResizeMode="NoResize"
+        Topmost="False"
+        Height="252"
+        Width="500">
+    <Window.Resources>
+        <Storyboard x:Key="IndeterminateAnimation" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="ProgressIndicatorTransform"
+                             Storyboard.TargetProperty="X"
+                             From="-140" To="420" Duration="0:0:1.6">
+                <DoubleAnimation.EasingFunction>
+                    <SineEase EasingMode="EaseInOut" />
+                </DoubleAnimation.EasingFunction>
+            </DoubleAnimation>
+        </Storyboard>
+    </Window.Resources>
+    <!-- Margin leaves room for the drop shadow of the card -->
+    <Border Name="Card" Margin="16" CornerRadius="12" BorderThickness="1"
+            BorderBrush="#33333A" Background="#202024">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="18" ShadowDepth="3" Opacity="0.45" Color="#000000" />
+        </Border.Effect>
+        <Grid Margin="32,26,32,24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" Orientation="Horizontal">
+                <Image Name="imgLogo" Width="60" Height="60" VerticalAlignment="Center"
+                       RenderOptions.BitmapScalingMode="HighQuality" />
+                <StackPanel Margin="18,0,0,0" VerticalAlignment="Center">
+                    <TextBlock Name="txtLogo" FontSize="38" FontFamily="Segoe UI Semibold" Foreground="#ECECF1">
+                        <Run Name="lblLogoPartA" Text="m" Foreground="#5E6AD2" /><Run Name="lblLogoPartB" Text="RemoteNG" />
+                    </TextBlock>
+                    <TextBlock Name="lblLogoPartC" Margin="2,0,0,0" FontSize="13" FontFamily="Segoe UI"
+                               Foreground="#9A9AA6" Text="Multi-Remote Next Generation Connection Manager" />
+                </StackPanel>
+            </StackPanel>
+
+            <Grid Grid.Row="2" Margin="0,0,0,12">
+                <TextBlock Name="lblLogoPartD" FontSize="12" FontFamily="Segoe UI" Foreground="#9A9AA6"
+                           Text="v.?.??.?" HorizontalAlignment="Left" />
+                <TextBlock Name="lblStatus" FontSize="12" FontFamily="Segoe UI" Foreground="#9A9AA6"
+                           Text="" HorizontalAlignment="Right" />
+            </Grid>
+
+            <!-- Slim indeterminate progress bar -->
+            <Border Grid.Row="3" Name="ProgressTrack" Height="4" CornerRadius="2" Background="#2E2E35" ClipToBounds="True">
+                <Border Name="ProgressIndicator" Width="140" HorizontalAlignment="Left" CornerRadius="2" Background="#5E6AD2">
+                    <Border.RenderTransform>
+                        <TranslateTransform x:Name="ProgressIndicatorTransform" X="-140" />
+                    </Border.RenderTransform>
+                </Border>
+            </Border>
         </Grid>
     </Border>
 </Window>

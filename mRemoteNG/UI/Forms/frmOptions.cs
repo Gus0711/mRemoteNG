@@ -11,6 +11,8 @@ using System.Configuration;
 using mRemoteNG.Properties;
 using mRemoteNG.Resources.Language;
 using System.Runtime.Versioning;
+using System.Drawing;
+using mRemoteNG.UI.Controls;
 #endregion
 
 namespace mRemoteNG.UI.Forms
@@ -41,6 +43,9 @@ namespace mRemoteNG.UI.Forms
             Cursor.Current = Cursors.WaitCursor;
             InitializeComponent();
             Icon = Resources.ImageConverter.GetImageAsIcon(Properties.Resources.Settings_16x);
+            PageName.Renderer = new OptionsNavigationRenderer();
+            lstOptionPages.UseDialogBackground = true;
+            lblPageTitle.Font = ModernFonts.CreateDisplaySemibold(16f);
             _pageName = pageName;
             Cursor.Current = Cursors.Default;
             DoubleBuffered = true;
@@ -100,6 +105,8 @@ namespace mRemoteNG.UI.Forms
             btnCancel.Text = Language._Cancel;
             btnApply.Text = Language.Apply;
             ApplyTheme();
+            ThemeManager.getInstance().ThemeChanged += ApplyTheme;
+            FitNavigationListHeight();
             lstOptionPages.SelectedIndexChanged += LstOptionPages_SelectedIndexChanged;
             lstOptionPages.SelectedIndex = 0;
             Logger.Instance.Log?.Debug($"[FrmOptions_Load] Selected index set to 0");
@@ -130,11 +137,33 @@ namespace mRemoteNG.UI.Forms
 
         private void ApplyTheme()
         {
-            if (!ThemeManager.getInstance().ActiveAndExtended) return;
-            BackColor = ThemeManager.getInstance().ActiveTheme.ExtendedPalette.getColor("Dialog_Background");
-            ForeColor = ThemeManager.getInstance().ActiveTheme.ExtendedPalette.getColor("Dialog_Foreground");
-            pnlBottom.BackColor = ThemeManager.getInstance().ActiveTheme.ExtendedPalette.getColor("Dialog_Background");
-            pnlBottom.ForeColor = ThemeManager.getInstance().ActiveTheme.ExtendedPalette.getColor("Dialog_Foreground");
+            if (IsDisposed) return;
+            if (!ModernControlColors.Enabled)
+            {
+                lblPageTitle.ForeColor = SystemColors.ControlText;
+                return;
+            }
+
+            ModernControlColors colors = ModernControlColors.Current;
+            BackColor = colors.Background;
+            ForeColor = colors.Text;
+            pnlBottom.BackColor = colors.Background;
+            pnlBottom.ForeColor = colors.Text;
+            pnlNav.BackColor = colors.Background;
+            pnlHeader.BackColor = colors.Background;
+            pnlMain.BackColor = colors.Background;
+            lstOptionPages.BackColor = colors.Background;
+            lblPageTitle.ForeColor = colors.Text;
+            pnlBottom.Invalidate();
+            lstOptionPages.Invalidate();
+        }
+
+        // Thin separator above the footer buttons
+        private void PnlBottom_Paint(object sender, PaintEventArgs e)
+        {
+            Color line = ModernControlColors.Enabled ? ModernControlColors.Current.CardBorder : SystemColors.ControlDark;
+            using Pen pen = new(line);
+            e.Graphics.DrawLine(pen, 0, 0, pnlBottom.Width, 0);
         }
 
         internal void RefreshUiLanguage()
@@ -157,6 +186,8 @@ namespace mRemoteNG.UI.Forms
                 }
 
                 lstOptionPages.BuildList(true);
+                if (lstOptionPages.SelectedObject is OptionsPage current)
+                    lblPageTitle.Text = current.PageName;
                 if (selectedPage != null)
                 {
                     SetActivatedPage(selectedPage.PageName);
@@ -177,7 +208,6 @@ namespace mRemoteNG.UI.Forms
             Logger.Instance.Log?.Debug($"[InitOptionsPagesToListView] START - Loading {_optionPageObjectNames.Count} pages");
 
             lstOptionPages.RowHeight = _display.ScaleHeight(lstOptionPages.RowHeight);
-            lstOptionPages.AllColumns.First().ImageGetter = ImageGetter;
 
             // Suspend layout to prevent flickering during batch loading
             lstOptionPages.BeginUpdate();
@@ -323,10 +353,15 @@ namespace mRemoteNG.UI.Forms
             TrackChangesInControls(page);
         }
 
-        private object ImageGetter(object rowobject)
+        // The navigation list is sized to its rows (the nav panel scrolls when the window is too small),
+        // so no empty list area is painted below the last page.
+        private void FitNavigationListHeight()
         {
-            OptionsPage page = rowobject as OptionsPage;
-            return page?.PageIcon == null ? _display.ScaleImage(Properties.Resources.F1Help_16x) : _display.ScaleImage(page.PageIcon);
+            lstOptionPages.Dock = DockStyle.Top;
+            lstOptionPages.Scrollable = false; // never scroll (avoids stale row fragments); the nav panel scrolls instead
+            lstOptionPages.Height = lstOptionPages.Items.Count * (lstOptionPages.RowHeight + 1) + _display.ScaleHeight(6);
+            pnlNav.AutoScroll = true;
+            pnlNav.Invalidate(true);
         }
 
         public void SetActivatedPage(string? pageName = default)
@@ -429,6 +464,8 @@ namespace mRemoteNG.UI.Forms
                     return;
                 }
 
+                lblPageTitle.Text = page.PageName;
+                lstOptionPages.Invalidate();
                 pnlMain.SuspendLayout();
                 pnlMain.Controls.Clear();
                 Logger.Instance.Log?.Debug($"[LstOptionPages_SelectedIndexChanged] pnlMain.Controls cleared");

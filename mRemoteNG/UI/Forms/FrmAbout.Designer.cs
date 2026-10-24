@@ -7,8 +7,9 @@
         {
             pbLogo = new System.Windows.Forms.PictureBox();
             pnlBottom = new System.Windows.Forms.Panel();
-            llCredits = new System.Windows.Forms.LinkLabel();
+            flpLinks = new System.Windows.Forms.FlowLayoutPanel();
             llChangelog = new System.Windows.Forms.LinkLabel();
+            llCredits = new System.Windows.Forms.LinkLabel();
             llLicense = new System.Windows.Forms.LinkLabel();
             lblTitle = new Controls.MrngLabel();
             lblVersion = new Controls.MrngLabel();
@@ -16,128 +17,138 @@
             lblCopyright = new Controls.MrngLabel();
             ((System.ComponentModel.ISupportInitialize)pbLogo).BeginInit();
             pnlBottom.SuspendLayout();
+            flpLinks.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // pbLogo
-            // 
-            pbLogo.BackColor = System.Drawing.Color.FromArgb(52, 58, 64);
-            pbLogo.BackgroundImage = Properties.Resources.Header_dark;
-            pbLogo.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            //
+            pbLogo.BackColor = System.Drawing.Color.FromArgb(32, 32, 36);
             pbLogo.Dock = System.Windows.Forms.DockStyle.Top;
             pbLogo.Location = new System.Drawing.Point(0, 0);
             pbLogo.Name = "pbLogo";
-            pbLogo.Size = new System.Drawing.Size(584, 120);
-            pbLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            pbLogo.Size = new System.Drawing.Size(584, 150);
             pbLogo.TabIndex = 1;
             pbLogo.TabStop = false;
-            // 
+            pbLogo.Paint += PbLogo_Paint;
+            pbLogo.Resize += PbLogo_Resize;
+            //
             // pnlBottom
-            // 
+            //
             pnlBottom.BackColor = System.Drawing.SystemColors.Control;
-            pnlBottom.Controls.Add(llCredits);
-            pnlBottom.Controls.Add(llChangelog);
-            pnlBottom.Controls.Add(llLicense);
+            pnlBottom.Controls.Add(flpLinks);
             pnlBottom.Controls.Add(lblTitle);
             pnlBottom.Controls.Add(lblVersion);
             pnlBottom.Controls.Add(lblLicense);
             pnlBottom.Controls.Add(lblCopyright);
             pnlBottom.Dock = System.Windows.Forms.DockStyle.Fill;
             pnlBottom.ForeColor = System.Drawing.SystemColors.ControlText;
-            pnlBottom.Location = new System.Drawing.Point(0, 120);
+            pnlBottom.Location = new System.Drawing.Point(0, 150);
             pnlBottom.Name = "pnlBottom";
-            pnlBottom.Size = new System.Drawing.Size(584, 161);
+            pnlBottom.Size = new System.Drawing.Size(584, 200);
             pnlBottom.TabIndex = 1;
-            // 
-            // llCredits
-            // 
-            llCredits.AutoSize = true;
-            llCredits.Font = new System.Drawing.Font("Segoe UI", 9.75F);
-            llCredits.Location = new System.Drawing.Point(5, 134);
-            llCredits.Name = "llCredits";
-            llCredits.Size = new System.Drawing.Size(49, 17);
-            llCredits.TabIndex = 10;
-            llCredits.TabStop = true;
-            llCredits.Text = "Credits";
-            llCredits.LinkClicked += llCredits_LinkClicked;
-            // 
+            //
+            // flpLinks
+            //
+            flpLinks.AutoSize = true;
+            flpLinks.Controls.Add(llChangelog);
+            flpLinks.Controls.Add(llCredits);
+            flpLinks.Controls.Add(llLicense);
+            flpLinks.Location = new System.Drawing.Point(28, 148);
+            flpLinks.Name = "flpLinks";
+            flpLinks.Size = new System.Drawing.Size(300, 25);
+            flpLinks.TabIndex = 8;
+            flpLinks.WrapContents = false;
+            //
             // llChangelog
-            // 
+            //
             llChangelog.AutoSize = true;
             llChangelog.Font = new System.Drawing.Font("Segoe UI", 9.75F);
-            llChangelog.Location = new System.Drawing.Point(5, 117);
+            llChangelog.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+            llChangelog.Location = new System.Drawing.Point(3, 3);
+            llChangelog.Margin = new System.Windows.Forms.Padding(3, 3, 18, 3);
             llChangelog.Name = "llChangelog";
             llChangelog.Size = new System.Drawing.Size(71, 17);
             llChangelog.TabIndex = 9;
             llChangelog.TabStop = true;
             llChangelog.Text = "Changelog";
             llChangelog.LinkClicked += llChangelog_LinkClicked;
-            // 
+            //
+            // llCredits
+            //
+            llCredits.AutoSize = true;
+            llCredits.Font = new System.Drawing.Font("Segoe UI", 9.75F);
+            llCredits.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+            llCredits.Location = new System.Drawing.Point(95, 3);
+            llCredits.Margin = new System.Windows.Forms.Padding(3, 3, 18, 3);
+            llCredits.Name = "llCredits";
+            llCredits.Size = new System.Drawing.Size(49, 17);
+            llCredits.TabIndex = 10;
+            llCredits.TabStop = true;
+            llCredits.Text = "Credits";
+            llCredits.LinkClicked += llCredits_LinkClicked;
+            //
             // llLicense
-            // 
+            //
             llLicense.AutoSize = true;
             llLicense.Font = new System.Drawing.Font("Segoe UI", 9.75F);
-            llLicense.Location = new System.Drawing.Point(5, 100);
+            llLicense.LinkBehavior = System.Windows.Forms.LinkBehavior.HoverUnderline;
+            llLicense.Location = new System.Drawing.Point(165, 3);
             llLicense.Name = "llLicense";
             llLicense.Size = new System.Drawing.Size(50, 17);
-            llLicense.TabIndex = 8;
+            llLicense.TabIndex = 11;
             llLicense.TabStop = true;
             llLicense.Text = "License";
             llLicense.LinkClicked += llLicense_LinkClicked;
-            // 
+            //
             // lblTitle
-            // 
+            //
             lblTitle.AutoSize = true;
-            lblTitle.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            lblTitle.ForeColor = System.Drawing.SystemColors.ControlText;
-            lblTitle.Location = new System.Drawing.Point(6, 3);
+            lblTitle.Font = new System.Drawing.Font("Segoe UI", 12.75F, System.Drawing.FontStyle.Bold);
+            lblTitle.Location = new System.Drawing.Point(30, 18);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new System.Drawing.Size(149, 27);
+            lblTitle.Size = new System.Drawing.Size(149, 23);
             lblTitle.TabIndex = 0;
             lblTitle.Text = "Fructus temporum";
-            lblTitle.UseCompatibleTextRendering = true;
-            // 
+            //
             // lblVersion
-            // 
+            //
             lblVersion.AutoSize = true;
             lblVersion.Font = new System.Drawing.Font("Segoe UI", 9.75F);
-            lblVersion.ForeColor = System.Drawing.SystemColors.ControlText;
-            lblVersion.Location = new System.Drawing.Point(6, 30);
+            lblVersion.Location = new System.Drawing.Point(31, 48);
             lblVersion.Name = "lblVersion";
-            lblVersion.Size = new System.Drawing.Size(49, 22);
+            lblVersion.SecondaryText = true;
+            lblVersion.Size = new System.Drawing.Size(49, 17);
             lblVersion.TabIndex = 1;
             lblVersion.Text = "Version";
-            lblVersion.UseCompatibleTextRendering = true;
-            // 
+            //
             // lblLicense
-            // 
+            //
             lblLicense.AutoSize = true;
             lblLicense.Font = new System.Drawing.Font("Segoe UI", 9.75F);
-            lblLicense.ForeColor = System.Drawing.SystemColors.ControlText;
-            lblLicense.Location = new System.Drawing.Point(6, 74);
+            lblLicense.Location = new System.Drawing.Point(31, 108);
             lblLicense.Name = "lblLicense";
-            lblLicense.Size = new System.Drawing.Size(48, 22);
+            lblLicense.SecondaryText = true;
+            lblLicense.Size = new System.Drawing.Size(48, 17);
             lblLicense.TabIndex = 5;
             lblLicense.Text = "License";
-            lblLicense.UseCompatibleTextRendering = true;
-            // 
+            //
             // lblCopyright
-            // 
+            //
             lblCopyright.AutoSize = true;
             lblCopyright.Font = new System.Drawing.Font("Segoe UI", 9.75F);
-            lblCopyright.ForeColor = System.Drawing.SystemColors.ControlText;
-            lblCopyright.Location = new System.Drawing.Point(6, 52);
+            lblCopyright.Location = new System.Drawing.Point(31, 84);
             lblCopyright.Name = "lblCopyright";
-            lblCopyright.Size = new System.Drawing.Size(63, 22);
+            lblCopyright.SecondaryText = true;
+            lblCopyright.Size = new System.Drawing.Size(63, 17);
             lblCopyright.TabIndex = 2;
             lblCopyright.Text = "Copyright";
-            lblCopyright.UseCompatibleTextRendering = true;
-            // 
+            //
             // frmAbout
-            // 
+            //
             AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             BackColor = System.Drawing.SystemColors.Control;
-            ClientSize = new System.Drawing.Size(584, 281);
+            ClientSize = new System.Drawing.Size(584, 350);
             Controls.Add(pnlBottom);
             Controls.Add(pbLogo);
             Font = new System.Drawing.Font("Segoe UI", 8.25F);
@@ -148,8 +159,9 @@
             ((System.ComponentModel.ISupportInitialize)pbLogo).EndInit();
             pnlBottom.ResumeLayout(false);
             pnlBottom.PerformLayout();
+            flpLinks.ResumeLayout(false);
+            flpLinks.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
         }
         #endregion
 
@@ -159,6 +171,7 @@
         internal Controls.MrngLabel lblLicense;
         internal System.Windows.Forms.Panel pnlBottom;
         internal System.Windows.Forms.PictureBox pbLogo;
+        private System.Windows.Forms.FlowLayoutPanel flpLinks;
         private System.Windows.Forms.LinkLabel llCredits;
         private System.Windows.Forms.LinkLabel llChangelog;
         private System.Windows.Forms.LinkLabel llLicense;

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Security;
+using System.Drawing;
 using System.Windows.Forms;
+using mRemoteNG.UI.Controls;
+using mRemoteNG.UI.GraphicsUtilities;
 using mRemoteNG.Security;
 using mRemoteNG.Themes;
 using mRemoteNG.Tools;
@@ -61,17 +64,17 @@ namespace mRemoteNG.UI.Forms
         {
             ApplyLanguage();
             ApplyTheme();
-            DisplayProperties display = new();
-            pbLock.Image = display.ScaleImage(pbLock.Image);
-            Height = tableLayoutPanel1.Height;
+            pbLock.Image = CreateLockTile();
 
             if (NewPasswordMode)
             {
+                FitToContent();
                 txtPassword.Focus();
                 return;
             }
             lblVerify.Visible = false;
             txtVerify.Visible = false;
+            FitToContent();
             txtPassword.Focus();
         }
 
@@ -134,6 +137,34 @@ namespace mRemoteNG.UI.Forms
 
             BackColor = activeTheme.ExtendedPalette.getColor("Dialog_Background");
             ForeColor = activeTheme.ExtendedPalette.getColor("Dialog_Foreground");
+            tableLayoutPanel1.BackColor = BackColor;
+        }
+
+        // Size the dialog to its visible rows (the verify box is hidden when only asking for a password).
+        private void FitToContent()
+        {
+            Size preferred = tableLayoutPanel1.GetPreferredSize(new Size(ClientSize.Width, 0));
+            if (preferred.Height > 0)
+                ClientSize = new Size(ClientSize.Width, preferred.Height);
+        }
+
+        // Fluent lock glyph on a rounded accent tile (replaces the old bitmap icon).
+        private Bitmap CreateLockTile()
+        {
+            int size = (int)Math.Round(48 * DeviceDpi / 96f);
+            bool themed = ModernControlColors.Enabled;
+            ModernControlColors? c = themed ? ModernControlColors.Current : null;
+            Color tile = c != null ? ModernGraphics.Blend(c.Background, c.Accent, c.IsDark ? 0.22f : 0.14f) : SystemColors.ControlLight;
+            Color glyph = c?.Accent ?? SystemColors.HotTrack;
+            if (c is { IsDark: true }) glyph = ModernGraphics.Blend(c.Accent, Color.White, 0.35f);
+
+            Bitmap bitmap = new(size, size);
+            using Graphics g = Graphics.FromImage(bitmap);
+            g.Clear(Color.Transparent);
+            ModernGraphics.FillRoundedRectangle(g, tile, new RectangleF(0, 0, size, size), size / 4f);
+            int inner = (int)(size * 0.5f);
+            FluentIcons.Draw(g, FluentIcons.Lock, new Rectangle((size - inner) / 2, (size - inner) / 2, inner, inner), glyph, inner * 0.9f);
+            return bitmap;
         }
 
         // ReSharper disable once UnusedMethodReturnValue.Local
@@ -153,6 +184,7 @@ namespace mRemoteNG.UI.Forms
 
         private void ShowStatus(string status)
         {
+            lblStatus.ForeColor = ModernControlColors.Enabled ? ModernPalette.Current.Danger : Color.Red;
             lblStatus.Visible = true;
             lblStatus.Text = status;
         }

@@ -27,6 +27,7 @@ namespace mRemoteNG.UI.Forms.OptionsPages
         public ThemePage()
         {
             InitializeComponent();
+            cboTheme.Format += CboTheme_Format;
             if (LicenseManager.UsageMode == LicenseUsageMode.Designtime) return;
             PageIcon = Resources.ImageConverter.GetImageAsIcon(Properties.Resources.AppearanceEditor_16x);
             _themeManager = ThemeManager.getInstance();
@@ -136,6 +137,31 @@ namespace mRemoteNG.UI.Forms.OptionsPages
         }
 
         #region Private Methods
+
+        /// <summary>
+        /// Friendly display name of a theme: theme names come from the .vstheme file names
+        /// ("ModernDark", "vs2015light"...), which are not meant to be shown as is.
+        /// </summary>
+        internal static string ThemeDisplayName(string themeName)
+        {
+            if (string.IsNullOrEmpty(themeName)) return themeName;
+            switch (themeName.ToLowerInvariant())
+            {
+                case "moderndark": return "Modern Dark";
+                case "modernlight": return "Modern Light";
+                case "vs2015dark": return "Visual Studio 2015 Dark";
+                case "vs2015light": return "Visual Studio 2015 Light";
+                case "vs2015blue": return "Visual Studio 2015 Blue";
+                case "darcula": return "Darcula";
+                default: return themeName;
+            }
+        }
+
+        private static void CboTheme_Format(object sender, ListControlConvertEventArgs e)
+        {
+            if (e.ListItem is ThemeInfo theme)
+                e.Value = ThemeDisplayName(theme.Name);
+        }
 
         #region Event Handlers
 

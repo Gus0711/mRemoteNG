@@ -7,6 +7,8 @@ using System.Windows.Forms;
 using mRemoteNG.App;
 using mRemoteNG.App.Info;
 using mRemoteNG.Resources.Language;
+using mRemoteNG.Themes;
+using mRemoteNG.UI.Controls;
 
 namespace mRemoteNG.UI.Forms
 {
@@ -25,6 +27,7 @@ namespace mRemoteNG.UI.Forms
             _isFatal = isFatal;
             InitializeComponent();
             SetLanguage();
+            ApplyTheme();
 
             if (exception == null)
                 return;
@@ -32,6 +35,46 @@ namespace mRemoteNG.UI.Forms
             textBoxExceptionMessage.Text = exception.Message;
             textBoxStackTrace.Text = exception.StackTrace;
             SetEnvironmentText();
+        }
+
+        // Apply the dark/light title bar before the window is shown to avoid a white flash.
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            try
+            {
+                ThemeManager.getInstance().ApplyThemeToTitleBar(this);
+            }
+            catch (Exception)
+            {
+                // never let theming break the crash report
+            }
+        }
+
+        // Best effort only: this dialog is shown when something went wrong, possibly in the theme code.
+        private void ApplyTheme()
+        {
+            try
+            {
+                buttonClose.Primary = true;
+                labelExceptionCaught.Font = ModernFonts.CreateDisplaySemibold(14f);
+                if (!ModernControlColors.Enabled) return;
+                ModernControlColors c = ModernControlColors.Current;
+                BackColor = c.Background;
+                ForeColor = c.Text;
+                tableLayoutPanel1.BackColor = c.Background;
+                labelExceptionCaught.ForeColor = c.Text;
+                labelExceptionIsFatalHeader.ForeColor = ModernPalette.Current.Danger;
+                foreach (Label header in new[] { labelExceptionMessageHeader, labelStackTraceHeader, labelEnvironment })
+                {
+                    header.ForeColor = c.TextSecondary;
+                    header.Font = ModernFonts.CreateSemibold(8.25f);
+                }
+            }
+            catch (Exception)
+            {
+                // keep the default look
+            }
         }
 
         private void SetEnvironmentText()

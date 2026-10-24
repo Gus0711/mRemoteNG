@@ -1,113 +1,115 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Runtime.Versioning;
 using System.Windows.Forms;
 using mRemoteNG.Themes;
+using mRemoteNG.UI.GraphicsUtilities;
 
 namespace mRemoteNG.UI.Controls
 {
     [SupportedOSPlatform("windows")]
-    //Groupbox is colored using the innerTab colors as the vstheme doesnt have explicit groupbox palettes (at least completes)
-    //This clas completely repaints the control
+    // Group box rendered as a Fluent "card": rounded, slightly raised surface with a subtle border and the
+    // title in semibold secondary text inside the top-left corner.
     public class MrngGroupBox : GroupBox
     {
-        private ThemeManager _themeManager;
+        private bool _appliedCardColor;
+        private Font? _titleFont;
 
         public MrngGroupBox()
         {
-            ThemeManager.getInstance().ThemeChanged += OnCreateControl;
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.ResizeRedraw | ControlStyles.UserPaint, true);
+            ThemeManager.getInstance().ThemeChanged += OnThemeChanged;
         }
 
+        private void OnThemeChanged()
+        {
+            if (IsDisposed) return;
+            ApplyCardColor();
+            Invalidate(true);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                ThemeManager.getInstance().ThemeChanged -= OnThemeChanged;
+
+            base.Dispose(disposing);
+
+            // The title font is only used for drawing (never assigned to Control.Font); release it last.
+            if (disposing)
+            {
+                _titleFont?.Dispose();
+                _titleFont = null;
+            }
+        }
 
         protected override void OnCreateControl()
         {
             base.OnCreateControl();
-            _themeManager = ThemeManager.getInstance();
-            if (_themeManager.ThemingActive)
+            ApplyCardColor();
+        }
+
+        protected override void OnFontChanged(EventArgs e)
+        {
+            _titleFont?.Dispose();
+            _titleFont = null;
+            base.OnFontChanged(e);
+        }
+
+        // Children inherit the card color (ambient BackColor) so labels/check boxes blend with the card.
+        private void ApplyCardColor()
+        {
+            if (ModernControlColors.Enabled)
             {
-                Invalidate();
+                BackColor = ModernControlColors.Current.Card;
+                _appliedCardColor = true;
             }
+            else if (_appliedCardColor)
+            {
+                ResetBackColor();
+                _appliedCardColor = false;
+            }
+        }
+
+        private Font TitleFont => _titleFont ??= ModernFonts.CreateSemibold(Font.SizeInPoints);
+
+        protected override void OnPaintBackground(PaintEventArgs pevent)
+        {
+            if (!ModernControlColors.Enabled)
+            {
+                base.OnPaintBackground(pevent);
+                return;
+            }
+
+            pevent.Graphics.Clear(ModernControlColors.ParentBackground(this));
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (!_themeManager.ActiveAndExtended)
+            if (!ModernControlColors.Enabled)
             {
                 base.OnPaint(e);
                 return;
             }
 
-            //Reusing the textbox colors
-            Color titleColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("GroupBox_Foreground");
-            //var backColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("GroupBox_Backgorund");
-            Color lineColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("GroupBox_Line");
+            ModernControlColors c = ModernControlColors.Current;
+            Graphics g = e.Graphics;
+            float radius = ModernControlColors.Scale(this, ModernPalette.LargeCornerRadius);
+            RectangleF bounds = new(0, 0, Width, Height);
+            ModernGraphics.FillRoundedRectangle(g, c.Card, bounds, radius);
+            ModernGraphics.DrawRoundedRectangle(g, c.CardBorder, bounds, radius);
 
-            if (!Enabled)
-            {
-                titleColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("GroupBox_Disabled_Foreground");
-                //backColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("GroupBox_Disabled_Background");
-                lineColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("GroupBox_Disabled_Line");
-            }
+            if (string.IsNullOrEmpty(Text)) return;
 
-
-            //var state = Enabled ? GroupBoxState.Normal : GroupBoxState.Disabled;
-            TextFormatFlags flags = TextFormatFlags.PreserveGraphicsTranslateTransform | TextFormatFlags.PreserveGraphicsClipping |
-                        TextFormatFlags.TextBoxControl | TextFormatFlags.WordBreak;
-
-            if (!ShowKeyboardCues)
-                flags |= TextFormatFlags.HidePrefix;
+            TextFormatFlags flags = TextFormatFlags.SingleLine | TextFormatFlags.EndEllipsis | TextFormatFlags.Top;
+            if (!ShowKeyboardCues) flags |= TextFormatFlags.HidePrefix;
+            int padX = ModernControlColors.Scale(this, 9);
+            int padY = ModernControlColors.Scale(this, 2);
+            Rectangle titleRect = new(padX, padY, Math.Max(0, Width - 2 * padX), TitleFont.Height + padY);
             if (RightToLeft == RightToLeft.Yes)
-                flags |= TextFormatFlags.RightToLeft | TextFormatFlags.Right;
-
-            //No clear backgorund, this control is transparently
-            //e.Graphics.FillRectangle(new SolidBrush(backColor), 0, 0, Width, Height);
-
-            Rectangle bounds = new(0, 0, Width, Height);
-            Rectangle rectangle = bounds;
-            rectangle.Width -= 8;
-            Size size = TextRenderer.MeasureText(e.Graphics, Text, Font, new Size(rectangle.Width, rectangle.Height),
-                                                flags);
-            rectangle.Width = size.Width;
-            rectangle.Height = size.Height;
-            if ((flags & TextFormatFlags.Right) == TextFormatFlags.Right)
-                rectangle.X = (bounds.Right - rectangle.Width) - 8;
-            else
-                rectangle.X += 8;
-            TextRenderer.DrawText(e.Graphics, Text, Font, rectangle, titleColor, flags);
-
-            if (rectangle.Width > 0)
-                rectangle.Inflate(2, 0);
-            using (Pen pen = new(lineColor))
-            {
-                int num = bounds.Top + (Font.Height / 2);
-                //Left line
-                e.Graphics.DrawLine(pen, bounds.Left + Padding.Left, num - Padding.Top, bounds.Left + Padding.Left,
-                                    bounds.Height - Padding.Bottom);
-                //Bottom line
-                e.Graphics.DrawLine(pen, bounds.Left + Padding.Left, bounds.Height - Padding.Bottom,
-                                    bounds.Width - Padding.Right, bounds.Height - Padding.Bottom);
-                //Beside text line
-                e.Graphics.DrawLine(pen, bounds.Left + Padding.Left, num - Padding.Top, rectangle.X - 3,
-                                    num - Padding.Top);
-                //Top line cutted
-                e.Graphics.DrawLine(pen, rectangle.X + rectangle.Width + 2, num - Padding.Top,
-                                    bounds.Width - Padding.Right, num - Padding.Top);
-                //Right line
-                e.Graphics.DrawLine(pen, bounds.Width - Padding.Right, num - Padding.Top, bounds.Width - Padding.Right,
-                                    bounds.Height - Padding.Bottom);
-            }
-
-            RaisePaintEvent(this, e);
-        }
-
-        private void InitializeComponent()
-        {
-            this.SuspendLayout();
-            // 
-            // NGGroupBox
-            // 
-            this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular,
-                                                System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.ResumeLayout(false);
+                flags |= TextFormatFlags.Right | TextFormatFlags.RightToLeft;
+            TextRenderer.DrawText(g, Text, TitleFont, titleRect, Enabled ? c.TextSecondary : c.TextDisabled, flags);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using mRemoteNG.Themes;
 using System.Drawing;
 using System.Windows.Forms;
@@ -17,25 +17,64 @@ namespace mRemoteNG.UI.Controls
 
         public MrngLabel()
         {
-            ThemeManager.getInstance().ThemeChanged += OnCreateControl;
+            _themeManager = ThemeManager.getInstance();
+            _themeManager.ThemeChanged += OnThemeChanged;
+        }
+
+        /// <summary>Renders the text with the theme's secondary (dimmed) text color.</summary>
+        [System.ComponentModel.DefaultValue(false)]
+        [System.ComponentModel.Category("Appearance")]
+        public bool SecondaryText { get; set; }
+
+        private void OnThemeChanged()
+        {
+            if (IsDisposed) return;
+            ApplyTheme();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                ThemeManager.getInstance().ThemeChanged -= OnThemeChanged;
+            base.Dispose(disposing);
         }
 
         protected override void OnCreateControl()
         {
             base.OnCreateControl();
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
             _themeManager = ThemeManager.getInstance();
             if (!_themeManager.ActiveAndExtended) return;
-            // Use the Dialog_* colors since Labels generally have the same colors as panels/dialogs/windows/etc...
-            BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("Dialog_Background");
-            ForeColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("Dialog_Foreground");
-            FontOverrider.FontOverride(this);
+            // Transparent so labels blend with whatever surface hosts them (dialog, card group box, header...)
+            BackColor = Color.Transparent;
+            ForeColor = SecondaryText
+                ? ModernControlColors.Current.TextSecondary
+                : _themeManager.ActiveTheme.ExtendedPalette.getColor("Dialog_Foreground");
             BuildTextFormatFlags();
             Invalidate();
+        }
+
+        protected override void OnTextAlignChanged(EventArgs e)
+        {
+            BuildTextFormatFlags();
+            base.OnTextAlignChanged(e);
+        }
+
+        protected override void OnAutoSizeChanged(EventArgs e)
+        {
+            BuildTextFormatFlags();
+            base.OnAutoSizeChanged(e);
         }
 
         private void BuildTextFormatFlags()
         {
             _textFormatFlags = TextFormatFlags.TextBoxControl;
+            if (!UseMnemonic)
+                _textFormatFlags |= TextFormatFlags.NoPrefix;
 
             // in default labels, wordwrap is enabled when autosize is false
             if (AutoSize == false)
@@ -71,7 +110,8 @@ namespace mRemoteNG.UI.Controls
                     _textFormatFlags |= TextFormatFlags.Bottom | TextFormatFlags.Right;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    _textFormatFlags |= TextFormatFlags.Top | TextFormatFlags.Left;
+                    break;
             }
         }
 
@@ -92,8 +132,7 @@ namespace mRemoteNG.UI.Controls
             }
             else
             {
-                Color disabledtextLabel =
-                    _themeManager.ActiveTheme.ExtendedPalette.getColor("TextBox_Disabled_Foreground");
+                Color disabledtextLabel = ModernControlColors.Current.TextDisabled;
                 TextRenderer.DrawText(e.Graphics, Text, Font, ClientRectangle, disabledtextLabel, _textFormatFlags);
             }
         }

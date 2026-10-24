@@ -1,6 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Text;
 using System.Windows.Forms;
+using mRemoteNG.UI.Controls;
+using mRemoteNG.UI.GraphicsUtilities;
 using mRemoteNG.App.Info;
 using mRemoteNG.Themes;
 using mRemoteNG.Resources.Language;
@@ -23,6 +28,7 @@ namespace mRemoteNG.UI.Forms
         {
             InitializeComponent();
             Icon = Resources.ImageConverter.GetImageAsIcon(Properties.Resources.UIAboutBox_16x);
+            lblTitle.Font = ModernFonts.CreateDisplaySemibold(13f);
             ThemeManager.getInstance().ThemeChanged += ApplyTheme;
             ApplyLanguage();
             ApplyTheme();
@@ -38,6 +44,7 @@ namespace mRemoteNG.UI.Forms
             llLicense.Text = Language.License;
             lblCopyright.Text = GeneralAppInfo.Copyright;
             lblVersion.Text = $@"Version {GeneralAppInfo.ApplicationVersion}";
+            lblTitle.Text = "Fructus temporum";
             AddPortableString();
         }
 
@@ -54,10 +61,110 @@ namespace mRemoteNG.UI.Forms
         private new void ApplyTheme()
         {
             ThemeManager.getInstance().ApplyThemeToTitleBar(this);
-            if (!ThemeManager.getInstance().ThemingActive) return;
-            if (!ThemeManager.getInstance().ActiveAndExtended) return;
-            pnlBottom.BackColor = ThemeManager.getInstance().ActiveTheme.ExtendedPalette.getColor("Dialog_Background");
-            pnlBottom.ForeColor = ThemeManager.getInstance().ActiveTheme.ExtendedPalette.getColor("Dialog_Foreground");
+            bool themed = ModernControlColors.Enabled;
+            ModernControlColors? c = themed ? ModernControlColors.Current : null;
+            Color back = c?.Background ?? SystemColors.Control;
+            BackColor = back;
+            pnlBottom.BackColor = back;
+            pnlBottom.ForeColor = c?.Text ?? SystemColors.ControlText;
+            flpLinks.BackColor = back;
+            pbLogo.BackColor = back;
+            Color accent = c?.Accent ?? SystemColors.HotTrack;
+            foreach (LinkLabel link in new[] { llChangelog, llCredits, llLicense })
+            {
+                link.LinkColor = accent;
+                link.VisitedLinkColor = accent;
+                link.ActiveLinkColor = c?.AccentPressed ?? SystemColors.Highlight;
+                link.BackColor = back;
+                if (link.Font.Name != ModernGraphics.UiFontFamily)
+                    link.Font = ModernGraphics.CreateUiFont(9.75f);
+            }
+
+            pbLogo.Invalidate();
+        }
+
+        private void PbLogo_Resize(object? sender, EventArgs e) => pbLogo.Invalidate();
+
+        // Hero banner: soft accent gradient, application icon and the "mRemoteNG" logotype.
+        private void PbLogo_Paint(object? sender, PaintEventArgs e)
+        {
+            Graphics g = e.Graphics;
+            bool themed = ModernControlColors.Enabled;
+            ModernControlColors? c = themed ? ModernControlColors.Current : null;
+            Color back = c?.Background ?? SystemColors.Control;
+            Color accent = c?.Accent ?? Color.FromArgb(82, 137, 249);
+            Color text = c?.Text ?? SystemColors.ControlText;
+            Color secondary = c?.TextSecondary ?? SystemColors.GrayText;
+            float scale = pbLogo.DeviceDpi / 96f;
+            Rectangle bounds = pbLogo.ClientRectangle;
+            if (bounds.Width <= 0 || bounds.Height <= 0) return;
+
+            using (LinearGradientBrush gradient = new(bounds, ModernGraphics.Blend(back, accent, c?.IsDark == false ? 0.10f : 0.16f), back, 70f))
+                g.FillRectangle(gradient, bounds);
+            using (Pen separator = new(c?.CardBorder ?? SystemColors.ControlDark))
+                g.DrawLine(separator, 0, bounds.Bottom - 1, bounds.Right, bounds.Bottom - 1);
+
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+            int iconSize = (int)Math.Round(64 * scale);
+            using Font logoFont = ModernFonts.LogoFontFamily != null
+                ? new Font(ModernFonts.LogoFontFamily, 34f * scale, FontStyle.Regular, GraphicsUnit.Pixel)
+                : ModernFonts.CreateDisplaySemibold(24f);
+            using Font subtitleFont = ModernGraphics.CreateUiFont(9.75f);
+            using StringFormat format = new(StringFormat.GenericTypographic) { FormatFlags = StringFormatFlags.NoWrap };
+
+            const string first = "m";
+            const string rest = "RemoteNG";
+            SizeF firstSize = g.MeasureString(first, logoFont, PointF.Empty, format);
+            SizeF restSize = g.MeasureString(rest, logoFont, PointF.Empty, format);
+            string subtitle = "Multi-Remote Next Generation Connection Manager";
+            SizeF subtitleSize = g.MeasureString(subtitle, subtitleFont, PointF.Empty, format);
+
+            float gap = 18 * scale;
+            float textWidth = Math.Max(firstSize.Width + restSize.Width, subtitleSize.Width);
+            float totalWidth = iconSize + gap + textWidth;
+            float x = 30 * scale; // aligned with the body text below
+            float centerY = bounds.Height / 2f;
+
+            Icon? appIcon = AppIcon;
+            if (appIcon != null)
+            {
+                using Icon sized = new(appIcon, iconSize, iconSize);
+                using Bitmap bitmap = sized.ToBitmap();
+                g.DrawImage(bitmap, new RectangleF(x, centerY - iconSize / 2f, iconSize, iconSize));
+            }
+
+            float textX = x + iconSize + gap;
+            float logoY = centerY - (firstSize.Height + subtitleSize.Height + 4 * scale) / 2f;
+            using (SolidBrush accentBrush = new(accent))
+                g.DrawString(first, logoFont, accentBrush, textX, logoY, format);
+            using (SolidBrush textBrush = new(text))
+                g.DrawString(rest, logoFont, textBrush, textX + firstSize.Width, logoY, format);
+            using (SolidBrush secondaryBrush = new(secondary))
+                g.DrawString(subtitle, subtitleFont, secondaryBrush, textX + 2 * scale, logoY + firstSize.Height + 4 * scale, format);
+        }
+
+        private static Icon? _appIcon;
+
+        private static Icon? AppIcon
+        {
+            get
+            {
+                if (_appIcon != null) return _appIcon;
+                try
+                {
+                    // multi-resolution application icon (contains 64 and 256 px images)
+                    _appIcon = Properties.Resources.mRemoteNG_Icon;
+                }
+                catch (Exception)
+                {
+                    _appIcon = null;
+                }
+
+                return _appIcon;
+            }
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

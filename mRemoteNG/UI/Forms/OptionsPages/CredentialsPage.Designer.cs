@@ -45,9 +45,9 @@
             radCredentialsCustom = new Controls.MrngRadioButton();
             lblRegistrySettingsUsedInfo = new System.Windows.Forms.Label();
             lblCredentialsGeneratorHelp = new Controls.MrngLabel();
-            btnCredentialsGenerator = new System.Windows.Forms.Button();
+            btnCredentialsGenerator = new mRemoteNG.UI.Controls.MrngButton();
             lblCredentialsGenerator = new Controls.MrngLabel();
-            txtCredentialsGeneratorPsswd = new System.Windows.Forms.TextBox();
+            txtCredentialsGeneratorPsswd = new mRemoteNG.UI.Controls.MrngTextBox();
             pnlDefaultCredentials.SuspendLayout();
             pnlCredentialsSettingsPanel.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
@@ -308,8 +308,8 @@
         internal System.Windows.Forms.Label lblRegistrySettingsUsedInfo;
         internal System.Windows.Forms.Panel pnlCredentialsSettingsPanel;
         internal Controls.MrngLabel lblCredentialsGenerator;
-        internal System.Windows.Forms.TextBox txtCredentialsGeneratorPsswd;
-        internal System.Windows.Forms.Button btnCredentialsGenerator;
+        internal mRemoteNG.UI.Controls.MrngTextBox txtCredentialsGeneratorPsswd;
+        internal mRemoteNG.UI.Controls.MrngButton btnCredentialsGenerator;
         internal Controls.MrngLabel lblCredentialsGeneratorHelp;
     }
 }
