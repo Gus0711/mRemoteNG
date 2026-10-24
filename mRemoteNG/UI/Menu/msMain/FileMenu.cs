@@ -61,7 +61,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenFileNew
             // 
-            _mMenFileNew.Image = Properties.Resources.NewFile_16x;
+            ToolStripGlyphs.Set(_mMenFileNew, FluentIcons.Document);
             _mMenFileNew.Name = "mMenFileNew";
             _mMenFileLoad.ShortcutKeys = Keys.Control | Keys.N;
             _mMenFileNew.Size = new System.Drawing.Size(281, 22);
@@ -70,7 +70,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenFileLoad
             // 
-            _mMenFileLoad.Image = Properties.Resources.OpenFile_16x;
+            ToolStripGlyphs.Set(_mMenFileLoad, FluentIcons.OpenFile);
             _mMenFileLoad.Name = "mMenFileLoad";
             _mMenFileLoad.ShortcutKeys = Keys.Control | Keys.O;
             _mMenFileLoad.Size = new System.Drawing.Size(281, 22);
@@ -79,6 +79,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenFileSave
             // 
+            ToolStripGlyphs.Set(_mMenFileSave, FluentIcons.Save);
             _mMenFileSave.Name = "mMenFileSave";
             _mMenFileSave.ShortcutKeys = Keys.Control | Keys.S;
             _mMenFileSave.Size = new System.Drawing.Size(281, 22);
@@ -87,6 +88,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenFileSaveAs
             // 
+            ToolStripGlyphs.Set(_mMenFileSaveAs, FluentIcons.SaveAs);
             _mMenFileSaveAs.Name = "mMenFileSaveAs";
             _mMenFileSaveAs.ShortcutKeys = (Keys.Control | Keys.Shift)
                                          | Keys.S;
@@ -106,7 +108,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenToolsOptions
             // 
-            _mMenToolsOptions.Image = Properties.Resources.Settings_16x;
+            ToolStripGlyphs.Set(_mMenToolsOptions, FluentIcons.Settings);
             _mMenToolsOptions.Name = "mMenToolsOptions";
             _mMenToolsOptions.Size = new System.Drawing.Size(184, 22);
             _mMenToolsOptions.Text = Language.Options;
@@ -114,7 +116,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenFileExit
             // 
-            _mMenFileExit.Image = Properties.Resources.CloseSolution_16x;
+            ToolStripGlyphs.Set(_mMenFileExit, FluentIcons.Power);
             _mMenFileExit.Name = "mMenFileExit";
             _mMenFileExit.ShortcutKeys = Keys.Alt | Keys.F4;
             _mMenFileExit.Size = new System.Drawing.Size(281, 22);

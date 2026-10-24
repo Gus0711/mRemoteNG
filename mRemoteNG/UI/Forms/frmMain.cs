@@ -129,6 +129,7 @@ namespace mRemoteNG.UI.Forms
             //Theming support
             _themeManager = ThemeManager.getInstance();
             vsToolStripExtender.DefaultRenderer = _toolStripProfessionalRenderer;
+            ModernToolStripRenderer.InstallIntoModernThemes();
             ApplyTheme();
 
             _advancedWindowMenu = new AdvancedWindowMenu(this);
@@ -298,6 +299,8 @@ namespace mRemoteNG.UI.Forms
             viewMenu.ApplyLanguage();
             toolsMenu.ApplyLanguage();
             helpMenu.ApplyLanguage();
+            _quickConnectToolStrip.ApplyLanguage();
+            _multiSshToolStrip.ApplyLanguage();
         }
 
         internal void RefreshUiLanguage()
@@ -396,6 +399,7 @@ namespace mRemoteNG.UI.Forms
             if (!_themeManager.ThemingActive)
             {
                 pnlDock.Theme = _themeManager.DefaultTheme.Theme;
+                ApplyHeaderChrome();
                 return;
             }
 
@@ -417,9 +421,12 @@ namespace mRemoteNG.UI.Forms
                 vsToolStripExtender.SetStyle(_quickConnectToolStrip, _themeManager.ActiveTheme.Version, _themeManager.ActiveTheme.Theme);
                 vsToolStripExtender.SetStyle(_externalToolsToolStrip, _themeManager.ActiveTheme.Version, _themeManager.ActiveTheme.Theme);
                 vsToolStripExtender.SetStyle(_multiSshToolStrip, _themeManager.ActiveTheme.Version, _themeManager.ActiveTheme.Theme);
+                ApplyHeaderChrome();
 
                 if (!_themeManager.ActiveAndExtended) return;
-                tsContainer.TopToolStripPanel.BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("CommandBarMenuDefault_Background");
+                tsContainer.TopToolStripPanel.BackColor = ModernToolStripRenderer.IsModernThemeActive
+                    ? ModernPalette.Current.Chrome
+                    : _themeManager.ActiveTheme.ExtendedPalette.getColor("CommandBarMenuDefault_Background");
                 BackColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("Dialog_Background");
                 ForeColor = _themeManager.ActiveTheme.ExtendedPalette.getColor("Dialog_Foreground");
             }
@@ -427,6 +434,67 @@ namespace mRemoteNG.UI.Forms
             {
                 Runtime.MessageCollector.AddExceptionStackTrace("Error applying theme", ex, MessageClass.WarningMsg);
             }
+        }
+
+        /// <summary>
+        /// Modern themes: the menu bar and toolbars form one seamless, chrome-colored header (same color as the
+        /// title bar) with consistent 40px rows. Legacy themes keep the designer metrics.
+        /// </summary>
+        private void ApplyHeaderChrome()
+        {
+            bool modern = ModernToolStripRenderer.IsModernThemeActive;
+            float scale = DeviceDpi / 96f;
+            int s(int v) => (int)Math.Round(v * scale);
+
+            ToolStripManager.Renderer = modern ? ModernToolStripRenderer.Instance : _toolStripProfessionalRenderer;
+            ToolStripPanel[] panels =
+            [
+                tsContainer.TopToolStripPanel, tsContainer.BottomToolStripPanel,
+                tsContainer.LeftToolStripPanel, tsContainer.RightToolStripPanel
+            ];
+
+            msMain.SuspendLayout();
+            if (modern)
+            {
+                foreach (ToolStripPanel panel in panels)
+                {
+                    panel.Renderer = ModernToolStripRenderer.Instance;
+                    panel.BackColor = ModernPalette.Current.Chrome;
+                }
+                msMain.GripMargin = new Padding(s(2), s(2), 0, s(2));
+                msMain.Font = ModernToolStripRenderer.UiFont;
+                msMain.Padding = new Padding(s(4), s(5), s(4), s(5));
+                msMain.MinimumSize = new Size(0, s(40));
+                foreach (ToolStripItem item in msMain.Items)
+                {
+                    item.Margin = new Padding(0, 0, s(1), 0);
+                    item.Padding = new Padding(s(8), s(5), s(8), s(5));
+                }
+            }
+            else
+            {
+                foreach (ToolStripPanel panel in panels)
+                {
+                    panel.RenderMode = ToolStripRenderMode.Professional;
+                    panel.ResetBackColor();
+                }
+                msMain.GripMargin = new Padding(2);
+                msMain.ResetFont();
+                msMain.Padding = new Padding(0, 0, 1, 0);
+                msMain.MinimumSize = Size.Empty;
+                foreach (ToolStripItem item in msMain.Items)
+                {
+                    item.Margin = new Padding(0, 3, 0, 3);
+                    item.Padding = new Padding(4, 0, 4, 0);
+                }
+            }
+            msMain.ResumeLayout();
+        }
+
+        protected override void OnDpiChanged(DpiChangedEventArgs e)
+        {
+            base.OnDpiChanged(e);
+            ApplyHeaderChrome();
         }
 
         private async void FrmMain_Shown(object sender, EventArgs e)
@@ -926,38 +994,12 @@ namespace mRemoteNG.UI.Forms
                 viewMenu._mMenViewErrorsAndInfos.Checked = false;
 
 
-            if (Properties.Settings.Default.ViewMenuExternalTools == true)
-            {
-                viewMenu.TsExternalTools.Visible = true;
-                viewMenu._mMenViewExtAppsToolbar.Checked = true;
-            }
-            else
-            {
-                viewMenu.TsExternalTools.Visible = false;
-                viewMenu._mMenViewExtAppsToolbar.Checked = false;
-            }
-
-            if (Properties.Settings.Default.ViewMenuMultiSSH == true)
-            {
-                viewMenu.TsMultiSsh.Visible = true;
-                viewMenu._mMenViewMultiSshToolbar.Checked = true;
-            }
-            else
-            {
-                viewMenu.TsMultiSsh.Visible = false;
-                viewMenu._mMenViewMultiSshToolbar.Checked = false;
-            }
-
-            if (Properties.Settings.Default.ViewMenuQuickConnect == true)
-            {
-                viewMenu.TsQuickConnect.Visible = true;
-                viewMenu._mMenViewQuickConnectToolbar.Checked = true;
-            }
-            else
-            {
-                viewMenu.TsQuickConnect.Visible = false;
-                viewMenu._mMenViewQuickConnectToolbar.Checked = false;
-            }
+            // Toolbar visibility is restored by SettingsLoader from the *TBVisible settings (saved on exit and
+            // defaulting to a visible quick connect bar); only keep the View menu check marks in sync here.
+            // (The ViewMenu* settings default to false and used to hide the quick connect toolbar on startup.)
+            viewMenu._mMenViewExtAppsToolbar.Checked = Properties.Settings.Default.ExtAppsTBVisible;
+            viewMenu._mMenViewMultiSshToolbar.Checked = Properties.Settings.Default.MultiSshToolbarVisible;
+            viewMenu._mMenViewQuickConnectToolbar.Checked = Properties.Settings.Default.QuickyTBVisible;
 
             if (Properties.Settings.Default.LockToolbars == true)
             {

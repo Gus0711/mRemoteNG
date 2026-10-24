@@ -313,7 +313,7 @@ namespace mRemoteNG.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("3, 24")]
+        [global::System.Configuration.DefaultSettingValueAttribute("400, 0")]
         public global::System.Drawing.Point QuickyTBLocation {
             get {
                 return ((global::System.Drawing.Point)(this["QuickyTBLocation"]));

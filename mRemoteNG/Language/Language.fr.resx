@@ -1310,6 +1310,12 @@ Nécessite RCD 8.0 ou postérieur.</value>
   <data name="QuickConnectAddFailed" xml:space="preserve">
     <value>Échec de l'ajout d'une connexion rapide !</value>
   </data>
+  <data name="QuickConnectPlaceholder" xml:space="preserve">
+    <value>Connexion rapide : nom d'hôte ou IP</value>
+  </data>
+  <data name="QuickConnectRecent" xml:space="preserve">
+    <value>Connexions récentes</value>
+  </data>
   <data name="QuickConnectFailed" xml:space="preserve">
     <value>La connexion rapide a échoué</value>
   </data>
@@ -2002,6 +2008,9 @@ Le canal nightly inclut les versions alpha, beta et release candidates.</value>
   </data>
   <data name="MultiSshToolTip" xml:space="preserve">
     <value>Appuyer sur ENTRER pour envoyer. Ctrl+C est envoyé immédiatement.</value>
+  </data>
+  <data name="MultiSshPlaceholder" xml:space="preserve">
+    <value>Envoyer une commande à toutes les sessions SSH</value>
   </data>
   <data name="PropertyDescriptionFavorite" xml:space="preserve">
     <value>Afficher cette connexion dans le menu des favoris.</value>

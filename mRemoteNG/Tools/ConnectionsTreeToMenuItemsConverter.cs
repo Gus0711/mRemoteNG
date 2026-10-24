@@ -7,6 +7,7 @@ using mRemoteNG.App;
 using mRemoteNG.Connection;
 using mRemoteNG.Container;
 using mRemoteNG.Tree;
+using mRemoteNG.UI;
 
 
 namespace mRemoteNG.Tools
@@ -58,7 +59,7 @@ namespace mRemoteNG.Tools
             ContainerInfo nodeAsContainer = node as ContainerInfo;
             if (nodeAsContainer != null)
             {
-                menuItem.Image = Properties.Resources.FolderClosed_16x;
+                ToolStripGlyphs.Set(menuItem, FluentIcons.Folder, ToolStripGlyphs.GlyphRole.Secondary);
                 menuItem.Tag = nodeAsContainer;
                 AddSubMenuNodes(nodeAsContainer.Children, menuItem);
             }
@@ -69,7 +70,10 @@ namespace mRemoteNG.Tools
             }
             else if (node.GetTreeNodeType() == TreeNodeType.Connection)
             {
-                menuItem.Image = node.OpenConnections.Count > 0 ? Properties.Resources.Run_16x : Properties.Resources.Stop_16x;
+                if (node.OpenConnections.Count > 0)
+                    ToolStripGlyphs.Set(menuItem, FluentIcons.Play, ToolStripGlyphs.GlyphRole.Success);
+                else
+                    ToolStripGlyphs.Set(menuItem, FluentIcons.Desktop, ToolStripGlyphs.GlyphRole.Secondary);
                 menuItem.Tag = node;
             }
 

@@ -74,7 +74,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenInfoHelp
             // 
-            _mMenInfoHelp.Image = Properties.Resources.F1Help_16x;
+            ToolStripGlyphs.Set(_mMenInfoHelp, FluentIcons.Help);
             _mMenInfoHelp.Name = "mMenInfoHelp";
             _mMenInfoHelp.ShortcutKeys = Keys.F1;
             _mMenInfoHelp.Size = new System.Drawing.Size(190, 22);
@@ -83,7 +83,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenToolsUpdate
             // 
-            _mMenToolsUpdate.Image = Properties.Resources.RunUpdate_16x;
+            ToolStripGlyphs.Set(_mMenToolsUpdate, FluentIcons.Sync);
             _mMenToolsUpdate.Name = "mMenToolsUpdate";
             _mMenToolsUpdate.Size = new System.Drawing.Size(190, 22);
             _mMenToolsUpdate.Text = Language.MenuItem_CheckForUpdates;
@@ -98,6 +98,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenInfoWebsite
             // 
+            ToolStripGlyphs.Set(_mMenInfoWebsite, FluentIcons.Globe);
             _mMenInfoWebsite.Name = "mMenInfoWebsite";
             _mMenInfoWebsite.Size = new System.Drawing.Size(190, 22);
             _mMenInfoWebsite.Text = Language.MenuItem_Website;
@@ -105,6 +106,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenInfoDonate
             // 
+            ToolStripGlyphs.Set(_mMenInfoDonate, ChromeGlyphs.Heart);
             _mMenInfoDonate.Name = "mMenInfoDonate";
             _mMenInfoDonate.Size = new System.Drawing.Size(190, 22);
             _mMenInfoDonate.Text = Language.MenuItem_Donate;
@@ -112,6 +114,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenInfoForum
             // 
+            ToolStripGlyphs.Set(_mMenInfoForum, ChromeGlyphs.Library);
             _mMenInfoForum.Name = "mMenInfoForum";
             _mMenInfoForum.Size = new System.Drawing.Size(190, 22);
             _mMenInfoForum.Text = Language.MenuItem_SupportForum;
@@ -119,6 +122,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenInfoChat
             // 
+            ToolStripGlyphs.Set(_mMenInfoChat, ChromeGlyphs.Chat);
             _mMenInfoChat.Name = "mMenInfoChat";
             _mMenInfoChat.Size = new System.Drawing.Size(190, 22);
             _mMenInfoChat.Text = Language.MenuItem_Chat;
@@ -126,6 +130,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenInfoCommunity
             // 
+            ToolStripGlyphs.Set(_mMenInfoCommunity, ChromeGlyphs.People);
             _mMenInfoCommunity.Name = "mMenInfoCommunity";
             _mMenInfoCommunity.Size = new System.Drawing.Size(190, 22);
             _mMenInfoCommunity.Text = Language.MenuItem_Community;
@@ -133,6 +138,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenInfoBug
             // 
+            ToolStripGlyphs.Set(_mMenInfoBug, ChromeGlyphs.Bug);
             _mMenInfoBug.Name = "mMenInfoBug";
             _mMenInfoBug.Size = new System.Drawing.Size(190, 22);
             _mMenInfoBug.Text = Language.MenuItem_ReportIssue;
@@ -155,7 +161,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenInfoAbout
             // 
-            _mMenInfoAbout.Image = Properties.Resources.UIAboutBox_16x;
+            ToolStripGlyphs.Set(_mMenInfoAbout, FluentIcons.Info);
             _mMenInfoAbout.Name = "mMenInfoAbout";
             _mMenInfoAbout.Size = new System.Drawing.Size(190, 22);
             _mMenInfoAbout.Text = Language.MenuItem_About;

@@ -50,7 +50,7 @@ namespace mRemoteNG.UI.Menu
             // 
             // mMenToolsExternalApps
             // 
-            _mMenToolsExternalApps.Image = Properties.Resources.Console_16x;
+            ToolStripGlyphs.Set(_mMenToolsExternalApps, FluentIcons.CommandPrompt);
             _mMenToolsExternalApps.Name = "mMenToolsExternalApps";
             _mMenToolsExternalApps.Size = new System.Drawing.Size(184, 22);
             _mMenToolsExternalApps.Text = Language.ExternalTool;

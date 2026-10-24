@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.Versioning;
 using System.Windows.Forms;
 using mRemoteNG.App;
@@ -9,110 +11,169 @@ using mRemoteNG.Resources.Language;
 
 namespace mRemoteNG.UI.Controls
 {
+    /// <summary>
+    /// Quick connect input of the quick connect toolbar: a rounded, search-style box with a placeholder,
+    /// a protocol pill and a "recent connections" history (Alt+Down / F4 or the clock button; Delete removes
+    /// the highlighted entry). Enter raises <see cref="ConnectRequested"/>.
+    /// </summary>
     [SupportedOSPlatform("windows")]
-    public class QuickConnectComboBox : ToolStripComboBox
+    public class QuickConnectComboBox : ModernInputHost
     {
-        private readonly ComboBox _comboBox;
-        private bool _ignoreEnter;
+        private const int LogicalWidth = 300;
 
-        public QuickConnectComboBox()
+        private readonly ModernInputBox _input;
+        private readonly TextBox _textBox;
+        private readonly ModernInputBox.TrailingButton _historyButton;
+        private readonly ModernInputBox.TrailingButton _protocolButton;
+        private readonly HistoryMenu _historyMenu;
+        private readonly List<HistoryItem> _history = [];
+
+        public QuickConnectComboBox() : base(new ModernInputBox(), LogicalWidth)
         {
-            _comboBox = ComboBox;
-            if (_comboBox == null) return;
-            _comboBox.PreviewKeyDown += ComboBox_PreviewKeyDown;
-            _comboBox.SelectedIndexChanged += ComboBox_SelectedIndexChanged;
-            _comboBox.DrawItem += ComboBox_DrawItem;
-            _comboBox.DrawMode = DrawMode.OwnerDrawFixed;
+            _input = Input;
+            _textBox = _input.InnerTextBox;
+            _input.LeadingGlyph = FluentIcons.Search;
+            _input.PlaceholderText = Language.QuickConnectPlaceholder;
+
+            _textBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            _textBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            _textBox.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+            _textBox.KeyDown += TextBox_KeyDown;
+
+            _historyMenu = new HistoryMenu();
+            _historyMenu.DeleteRequested += HistoryMenu_DeleteRequested;
+            _historyMenu.Closed += (_, _) => _input.Invalidate();
+
+            _historyButton = new ModernInputBox.TrailingButton
+            {
+                Glyph = FluentIcons.History,
+                Visible = false,
+                ToolTip = Language.QuickConnectRecent,
+                Click = _ => ShowHistory()
+            };
+            _protocolButton = new ModernInputBox.TrailingButton
+            {
+                ShowChevron = true,
+                ToolTip = Language.Protocol,
+                Click = ShowProtocolMenu
+            };
+            _input.TrailingButtons.Add(_historyButton);
+            _input.TrailingButtons.Add(_protocolButton);
+            _input.RefreshButtons();
+
             CausesValidation = false;
-
-            // This makes it so that _ignoreEnter works correctly before any items are added to the combo box
-            _comboBox.Items.Clear();
         }
 
-        private void ComboBox_PreviewKeyDown(object sender, PreviewKeyDownEventArgs e)
+        /// <summary>Menu listing the protocols, shown below the protocol pill.</summary>
+        public ContextMenuStrip ProtocolMenu { get; set; }
+
+        /// <summary>Protocol displayed in the protocol pill.</summary>
+        public string ProtocolText
         {
-            if (e.KeyCode == Keys.Enter & _comboBox.DroppedDown)
+            get => _protocolButton.Text;
+            set
             {
-                _ignoreEnter = true;
+                _protocolButton.Text = value;
+                _input.RefreshButtons();
             }
         }
 
-        protected override void OnKeyDown(KeyEventArgs e)
+        public string PlaceholderText
         {
-            base.OnKeyDown(e);
-            if (e.KeyCode == Keys.Enter)
-            {
-                // Only connect if Enter was not pressed while the combo box was dropped down
-                if (!_ignoreEnter)
-                {
-                    OnConnectRequested(new ConnectRequestedEventArgs(_comboBox.Text));
-                }
+            get => _input.PlaceholderText;
+            set => _input.PlaceholderText = value;
+        }
 
-                _ignoreEnter = false;
-                e.Handled = true;
-            }
-            else if (e.KeyCode == Keys.Delete & _comboBox.DroppedDown)
-            {
-                if (_comboBox.SelectedIndex != -1)
-                {
-                    // Items can't be removed from the ComboBox while it is dropped down without possibly causing
-                    // an exception so we must close it, delete the item, and then drop it down again. When we
-                    // close it programmatically, the SelectedItem may revert to Nothing, so we must save it first.
-                    object item = _comboBox.SelectedItem;
-                    _comboBox.DroppedDown = false;
-                    _comboBox.Items.Remove(item);
-                    _comboBox.SelectedIndex = -1;
-                    if (_comboBox.Items.Count != 0)
-                    {
-                        _comboBox.DroppedDown = true;
-                    }
-                }
+        /// <summary>The menu showing the history (styled by the owner like the other menus).</summary>
+        public ContextMenuStrip HistoryDropDown => _historyMenu;
 
-                e.Handled = true;
+        public new void Focus() => _input.FocusInput();
+
+        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (e.KeyCode)
+            {
+                case Keys.Enter:
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                    OnConnectRequested(new ConnectRequestedEventArgs(_textBox.Text));
+                    break;
+                case Keys.Down when e.Alt:
+                case Keys.F4:
+                case Keys.Down when _textBox.TextLength == 0:
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                    ShowHistory();
+                    break;
             }
         }
 
-        private void ComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void ShowProtocolMenu(Rectangle bounds)
         {
-            if (!(_comboBox.SelectedItem is HistoryItem))
-            {
+            if (ProtocolMenu == null)
                 return;
+
+            ProtocolMenu.Show(_input, new Point(bounds.Left, _input.Height + _input.LogicalToDeviceUnits(4)));
+        }
+
+        private void ShowHistory()
+        {
+            if (_history.Count == 0)
+                return;
+
+            _historyMenu.Items.Clear();
+            foreach (HistoryItem historyItem in _history)
+            {
+                ToolStripMenuItem menuItem = new(historyItem.ToString(true)) { Tag = historyItem };
+                ToolStripGlyphs.Set(menuItem, FluentIcons.History, ToolStripGlyphs.GlyphRole.Secondary);
+                menuItem.Click += HistoryMenuItem_Click;
+                _historyMenu.Items.Add(menuItem);
             }
 
-            HistoryItem historyItem = (HistoryItem)_comboBox.SelectedItem;
+            _historyMenu.MinimumSize = new Size(_input.Width, 0);
+            _historyMenu.Show(_input, new Point(0, _input.Height + _input.LogicalToDeviceUnits(4)));
+            if (_historyMenu.Items.Count > 0)
+                _historyMenu.Items[0].Select();
+        }
+
+        private void HistoryMenuItem_Click(object sender, EventArgs e)
+        {
+            if (sender is not ToolStripItem { Tag: HistoryItem historyItem })
+                return;
+
+            _textBox.Text = historyItem.ToString();
+            _input.FocusInput();
             OnProtocolChanged(new ProtocolChangedEventArgs(historyItem.ConnectionInfo.Protocol));
         }
 
-        private static void ComboBox_DrawItem(object sender, DrawItemEventArgs e)
+        private void HistoryMenu_DeleteRequested(object sender, ToolStripItem item)
         {
-            ComboBox comboBox = sender as ComboBox;
-            if (comboBox == null)
-            {
+            if (item.Tag is not HistoryItem historyItem)
                 return;
-            }
 
-            object drawItem = comboBox.Items[e.Index];
+            _history.Remove(historyItem);
+            _textBox.AutoCompleteCustomSource.Remove(historyItem.ToString());
+            _historyMenu.Items.Remove(item);
+            item.Dispose();
+            UpdateHistoryButton();
 
-            string drawString;
-            if (drawItem is HistoryItem)
-            {
-                HistoryItem historyItem = (HistoryItem)drawItem;
-                drawString = historyItem.ToString(true);
-            }
-            else
-            {
-                drawString = drawItem.ToString();
-            }
-
-            e.DrawBackground();
-            e.Graphics.DrawString(drawString, e.Font, new SolidBrush(e.ForeColor),
-                                  new RectangleF(e.Bounds.X, e.Bounds.Y, e.Bounds.Width, e.Bounds.Height));
-            e.DrawFocusRectangle();
+            if (_historyMenu.Items.Count == 0)
+                _historyMenu.Close();
         }
 
-        private struct HistoryItem : IEquatable<HistoryItem>
+        private void UpdateHistoryButton()
         {
-            public ConnectionInfo ConnectionInfo { get; set; }
+            bool visible = _history.Count > 0;
+            if (_historyButton.Visible == visible)
+                return;
+
+            _historyButton.Visible = visible;
+            _input.RefreshButtons();
+        }
+
+        private readonly struct HistoryItem(ConnectionInfo connectionInfo) : IEquatable<HistoryItem>
+        {
+            public ConnectionInfo ConnectionInfo { get; } = connectionInfo;
 
             public bool Equals(HistoryItem other)
             {
@@ -128,6 +189,11 @@ namespace mRemoteNG.UI.Controls
 
                 return ConnectionInfo.Protocol == other.ConnectionInfo.Protocol;
             }
+
+            public override bool Equals(object obj) => obj is HistoryItem other && Equals(other);
+
+            public override int GetHashCode() =>
+                HashCode.Combine(ConnectionInfo.Hostname, ConnectionInfo.Port, ConnectionInfo.Protocol);
 
             public override string ToString()
             {
@@ -148,38 +214,57 @@ namespace mRemoteNG.UI.Controls
             }
         }
 
-        private bool Exists(HistoryItem searchItem)
-        {
-            foreach (object item in _comboBox.Items)
-            {
-                if (!(item is HistoryItem))
-                {
-                    continue;
-                }
-
-                HistoryItem historyItem = (HistoryItem)item;
-                if (historyItem.Equals(searchItem))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         public void Add(ConnectionInfo connectionInfo)
         {
             try
             {
-                HistoryItem historyItem = new() { ConnectionInfo = connectionInfo};
-                if (!Exists(historyItem))
-                {
-                    _comboBox.Items.Insert(0, historyItem);
-                }
+                HistoryItem historyItem = new(connectionInfo);
+                if (_history.Any(item => item.Equals(historyItem)))
+                    return;
+
+                _history.Insert(0, historyItem);
+                string text = historyItem.ToString();
+                if (!_textBox.AutoCompleteCustomSource.Contains(text))
+                    _textBox.AutoCompleteCustomSource.Add(text);
+                UpdateHistoryButton();
             }
             catch (Exception ex)
             {
                 Runtime.MessageCollector.AddExceptionMessage(Language.QuickConnectAddFailed, ex);
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                _historyMenu.Dispose();
+            base.Dispose(disposing);
+        }
+
+        /// <summary>History popup: Delete removes the highlighted entry.</summary>
+        private sealed class HistoryMenu : ContextMenuStrip
+        {
+            public event EventHandler<ToolStripItem> DeleteRequested;
+
+            public HistoryMenu()
+            {
+                ShowImageMargin = true;
+                ShowCheckMargin = false;
+            }
+
+            protected override bool ProcessDialogKey(Keys keyData)
+            {
+                if (keyData == Keys.Delete)
+                {
+                    ToolStripItem selected = Items.Cast<ToolStripItem>().FirstOrDefault(item => item.Selected);
+                    if (selected != null)
+                    {
+                        DeleteRequested?.Invoke(this, selected);
+                        return true;
+                    }
+                }
+
+                return base.ProcessDialogKey(keyData);
             }
         }
 
@@ -203,8 +288,7 @@ namespace mRemoteNG.UI.Controls
 
         private void OnConnectRequested(ConnectRequestedEventArgs e)
         {
-            // TODO: Any reason to not jsut pass "e"?
-            ConnectRequestedEvent?.Invoke(this, new ConnectRequestedEventArgs(e.ConnectionString));
+            ConnectRequestedEvent?.Invoke(this, e);
         }
 
         public class ProtocolChangedEventArgs(ProtocolType protocol) : EventArgs
@@ -225,8 +309,7 @@ namespace mRemoteNG.UI.Controls
 
         private void OnProtocolChanged(ProtocolChangedEventArgs e)
         {
-            // TODO: Any reason to not jsut pass "e"?
-            ProtocolChangedEvent?.Invoke(this, new ProtocolChangedEventArgs(e.Protocol));
+            ProtocolChangedEvent?.Invoke(this, e);
         }
 
         #endregion
