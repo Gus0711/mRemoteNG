@@ -9,7 +9,9 @@
     <OutputType>Package</OutputType>
     <Cultures>en-US</Cultures>
     <SuppressPdbOutput>true</SuppressPdbOutput>
-    <DefineConstants>InstallerSolutionDir=$(MSBuildProjectDirectory)\..\..\;HarvestPath=$(MSBuildProjectDirectory)\..\..\mRemoteNG\bin\x64\$(Configuration)</DefineConstants>
+    <!-- Folder whose content is installed; override with -p:HarvestPath=... (e.g. a self-contained publish folder). -->
+    <HarvestPath Condition="'$(HarvestPath)' == ''">$(MSBuildProjectDirectory)\..\..\mRemoteNG\bin\x64\$(Configuration)</HarvestPath>
+    <DefineConstants>InstallerSolutionDir=$(MSBuildProjectDirectory)\..\..\;HarvestPath=$(HarvestPath)</DefineConstants>
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <IntermediateOutputPath>obj\$(Platform)\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>

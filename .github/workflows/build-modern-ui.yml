@@ -1,0 +1,98 @@
+name: Build_Modern_UI_Installer
+# Builds the self-contained x64 app and its MSI installer for the modern UI branch.
+# Results are uploaded as workflow artifacts only (no GitHub release, no tag).
+on:
+  push:
+    branches:
+      - feature/modern-ui
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-installer:
+    runs-on: windows-2025-vs2026
+    env:
+      PLATFORM: x64
+      APP_OUT: ${{ github.workspace }}\mRemoteNG\bin\x64\x64\Release
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+
+      - name: Install .NET 10 SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Set up MSBuild
+        uses: microsoft/setup-msbuild@v3
+        with:
+          msbuild-architecture: x64
+
+      - name: Resolve MSBuild environment
+        shell: pwsh
+        run: |
+          $msbuild = (Get-Command msbuild -ErrorAction Stop).Source
+          $dotnetRoot = Split-Path (Get-Command dotnet -ErrorAction Stop).Source -Parent
+          $sdkBasePath = ((& dotnet --info) | Select-String -Pattern '^\s*Base Path:\s*(.+)$' | Select-Object -First 1).Matches[0].Groups[1].Value.Trim()
+          "MSBUILD_EXE=$msbuild" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "MSBuildSDKsPath=$(Join-Path $sdkBasePath 'Sdks')" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR=$dotnetRoot" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "DOTNET_ROOT=$dotnetRoot" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Transform T4 templates
+        shell: pwsh
+        run: |
+          dotnet tool install --global dotnet-t4
+          $env:PATH += ";$env:USERPROFILE\.dotnet\tools"
+          t4 "$env:GITHUB_WORKSPACE\mRemoteNG\Properties\AssemblyInfo.tt" -P platformType=x64 -r:"$env:GITHUB_WORKSPACE\mRemoteNG\libs\Microsoft.VisualStudio.Interop.dll"
+
+      - name: Cache NuGet Packages
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-modern-ui-nuget-${{ hashFiles('**/*.csproj', '**/*.wixproj', 'Directory.Packages.props') }}
+          restore-keys: |
+            ${{ runner.os }}-modern-ui-nuget-
+
+      - name: Restore
+        shell: pwsh
+        run: |
+          dotnet restore "$env:GITHUB_WORKSPACE\mRemoteNG\mRemoteNG.csproj" -p:Configuration="Release Self-Contained" -p:Platform=x64 -p:SelfContained=true -p:RuntimeIdentifier=win-x64 -p:PublishReadyToRun=true
+
+      - name: Build self-contained app
+        shell: pwsh
+        run: |
+          & "$env:MSBUILD_EXE" "$env:GITHUB_WORKSPACE\mRemoteNG\mRemoteNG.csproj" /p:Configuration="Release Self-Contained" /p:Platform=x64 /p:MSBuildEnableWorkloadResolver=false /verbosity:minimal /p:SelfContained=true /p:RuntimeIdentifier=win-x64 /p:PublishDir="$env:APP_OUT"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (!(Test-Path "$env:APP_OUT\mRemoteNG.exe")) { throw "mRemoteNG.exe not found in $env:APP_OUT" }
+          if (!(Test-Path "$env:APP_OUT\Themes\ModernDark.vstheme")) { throw "Modern themes missing from $env:APP_OUT" }
+          Get-ChildItem $env:APP_OUT | Measure-Object | ForEach-Object { "Files in app folder: $($_.Count)" }
+
+      - name: Build MSI installer
+        shell: pwsh
+        run: |
+          & "$env:MSBUILD_EXE" "$env:GITHUB_WORKSPACE\mRemoteNGInstaller\Installer\Installer.wixproj" /restore /p:Configuration=Release /p:Platform=x64 /p:HarvestPath="$env:APP_OUT" /verbosity:minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $msi = Get-ChildItem "$env:GITHUB_WORKSPACE\mRemoteNGInstaller\Installer\bin" -Recurse -Filter *.msi | Select-Object -First 1
+          if (!$msi) { throw "MSI not produced" }
+          $name = "mRemoteNG-ModernUI-$(Get-Date -Format yyyyMMdd-HHmm)-x64-SC"
+          New-Item -ItemType Directory -Force -Path out | Out-Null
+          Copy-Item $msi.FullName "out\$name.msi"
+          Compress-Archive -Path "$env:APP_OUT\*" -DestinationPath "out\$name.zip"
+          Get-ChildItem out | ForEach-Object { "$($_.Name)  $([math]::Round($_.Length / 1MB, 1)) MB" }
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v7
+        with:
+          name: mRemoteNG-ModernUI-installer
+          path: out\*.msi
+          retention-days: 30
+
+      - name: Upload zip (no installer)
+        uses: actions/upload-artifact@v7
+        with:
+          name: mRemoteNG-ModernUI-zip
+          path: out\*.zip
+          retention-days: 30
