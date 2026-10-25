@@ -74,9 +74,9 @@ Sans Visual Studio, la machine de dev utilise :
 - une interop RDP 64 bits générée depuis `C:\Windows\System32\mstscax.dll` (Windows PowerShell 5.1 : `TypeLibConverter` + `AxImporter`) ;
 - un fichier `LocalBuild.targets` passé via `-p:CustomAfterMicrosoftCommonTargets=...` qui remplace la référence COM par ces DLL et active `PORTABLE` (les réglages et connexions restent à côté de l'exe, `%APPDATA%` n'est pas touché).
 
-Ces fichiers sont hors du repo (dossier temporaire de la session). Pour une vraie version, passer par le workflow GitHub ou par Visual Studio.
+Ces outils ont été **supprimés le 25/10/2026** (ménage) : SDK local, interop et scripts n'existent plus sur la machine.
+Pour compiler, passer par le workflow GitHub (recommandé) ou par Visual Studio ; pour recompiler en local, il faudrait les recréer.
 
-Lancer un build portable local : `$env:DOTNET_ROOT="$env:LOCALAPPDATA\dotnet-sdk10"` puis l'exe de `mRemoteNG\bin\x64\Release` (ou `Release2`).
 
 ## Tests
 
