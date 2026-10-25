@@ -965,7 +965,10 @@ namespace mRemoteNG.Connection.Protocol.RDP
             const int UI_ERR_NORMAL_DISCONNECT = 0xB08;
             if (discReason != UI_ERR_NORMAL_DISCONNECT)
             {
-                string reason = _rdpClient.GetErrorDescription((uint)discReason, (uint)_rdpClient.ExtendedDisconnectReason);
+                int extendedReason = (int)_rdpClient.ExtendedDisconnectReason;
+                string reason = _rdpClient.GetErrorDescription((uint)discReason, (uint)extendedReason);
+                // The control often returns an empty description; the codes are what identifies the cause.
+                reason = $"{reason} (disconnect reason 0x{discReason:X}, extended reason {extendedReason})".TrimStart();
                 Event_Disconnected(this, reason, discReason);
             }
 
