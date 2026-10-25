@@ -75,7 +75,9 @@
     <ResolveComReferenceSilent>True</ResolveComReferenceSilent>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Self-Contained|x64'">
-    <DefineConstants>PORTABLE</DefineConstants>
+    <!-- InstalledEdition=true (MSI build): keep data in %APPDATA% instead of next to the exe,
+         which is read-only under Program Files. -->
+    <DefineConstants Condition="'$(InstalledEdition)' != 'true'">PORTABLE</DefineConstants>
     <Optimize>True</Optimize>
     <PublishDir>bin\x64\Publish Self-Contained\</PublishDir>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>

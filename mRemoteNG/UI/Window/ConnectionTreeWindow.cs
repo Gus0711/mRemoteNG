@@ -246,7 +246,9 @@ namespace mRemoteNG.UI.Window
             mMenViewCollapseAllFolders.Click += (sender, args) =>
             {
                 ConnectionTree.CollapseAll();
-                ConnectionTree.Expand(ConnectionTree.GetRootConnectionNode());
+                RootNodeInfo rootNode = ConnectionTree.ConnectionTreeModel?.RootNodes.OfType<RootNodeInfo>().FirstOrDefault();
+                if (rootNode != null)
+                    ConnectionTree.Expand(rootNode);
             };
             mMenSort.Click += (sender, args) =>
             {

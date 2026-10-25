@@ -12,6 +12,9 @@ namespace mRemoteNG.App.Initialization
         {
             new SaveConnectionsOnEdit(Runtime.ConnectionsService);
 
+            if (!Properties.OptionsBackupPage.Default.LoadConsFromCustomLocation && string.IsNullOrEmpty(Properties.OptionsConnectionsPage.Default.ConnectionFilePath))
+                LegacyDataImporter.ImportIfNeeded();
+
             if (Properties.App.Default.FirstStart && !Properties.OptionsBackupPage.Default.LoadConsFromCustomLocation && !File.Exists(Runtime.ConnectionsService.GetStartupConnectionFileName()))
                 Runtime.ConnectionsService.NewConnectionsFile(Runtime.ConnectionsService.GetStartupConnectionFileName());
 

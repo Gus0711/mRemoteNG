@@ -1,5 +1,6 @@
 name: Build_Modern_UI_Installer
 # Builds the self-contained x64 app and its MSI installer for the modern UI branch.
+# Built as the installed edition (data in %APPDATA%, not next to the exe in Program Files).
 # Results are uploaded as workflow artifacts only (no GitHub release, no tag).
 on:
   push:
@@ -64,7 +65,7 @@ jobs:
       - name: Build self-contained app
         shell: pwsh
         run: |
-          & "$env:MSBUILD_EXE" "$env:GITHUB_WORKSPACE\mRemoteNG\mRemoteNG.csproj" /p:Configuration="Release Self-Contained" /p:Platform=x64 /p:MSBuildEnableWorkloadResolver=false /verbosity:minimal /p:SelfContained=true /p:RuntimeIdentifier=win-x64 /p:PublishDir="$env:APP_OUT"
+          & "$env:MSBUILD_EXE" "$env:GITHUB_WORKSPACE\mRemoteNG\mRemoteNG.csproj" /p:Configuration="Release Self-Contained" /p:Platform=x64 /p:MSBuildEnableWorkloadResolver=false /verbosity:minimal /p:SelfContained=true /p:RuntimeIdentifier=win-x64 /p:InstalledEdition=true /p:PublishDir="$env:APP_OUT"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           if (!(Test-Path "$env:APP_OUT\mRemoteNG.exe")) { throw "mRemoteNG.exe not found in $env:APP_OUT" }
           if (!(Test-Path "$env:APP_OUT\Themes\ModernDark.vstheme")) { throw "Modern themes missing from $env:APP_OUT" }
