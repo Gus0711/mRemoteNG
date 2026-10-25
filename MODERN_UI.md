@@ -30,6 +30,9 @@ Briques réutilisables pour du code dessiné à la main :
 - Barre de connexion rapide invisible / placée avant le menu.
 - Crash à la fermeture (ou « Reconnecter tout ») d'un onglet dont la session n'a jamais démarré.
 - Libellés japonais dans la page Thème des Options.
+- MSI qui installait une build **portable** dans Program Files (dossier en lecture seule → arbre vide, « + » sans effet,
+  « Sequence contains no matching element ») : le MSI est maintenant compilé en édition installée (`-p:InstalledEdition=true`).
+- Installation : action personnalisée en échec (erreur 1603) faute de `CustomAction.config` dans la DLL.
 
 ## Installer
 
@@ -37,7 +40,7 @@ Chaque push sur `feature/modern-ui` lance le workflow **Build_Modern_UI_Installe
 (`.github/workflows/build-modern-ui.yml`) sur GitHub Actions. Il produit, en artefacts (pas de release ni de tag) :
 
 - `mRemoteNG-ModernUI-<date>-x64-SC.msi` — installeur x64 **autonome** (runtime .NET 10 inclus) ;
-- `mRemoteNG-ModernUI-<date>-x64-SC.zip` — même contenu sans installeur.
+- `mRemoteNG-ModernUI-<date>-x64-SC.zip` — même contenu sans installeur (édition installée, pas portable : données dans `%APPDATA%`).
 
 Récupérer le dernier MSI :
 
@@ -54,7 +57,8 @@ L'installeur WiX (`mRemoteNGInstaller/Installer`) prend désormais automatiqueme
 
 ### Avant d'installer
 
-- **Données réelles** : la version installée lit/écrit `%APPDATA%\mRemoteNG` (tes vraies connexions).
+- **Données** : la version installée utilise `%APPDATA%\mRemoteNG Connection Manager` (nom de produit de la 1.78).
+  Au premier lancement, elle y **copie** `confCons.xml` et `extApps.xml` depuis `%APPDATA%\mRemoteNG` (1.76) ; l'original n'est pas modifié.
   Sauvegarde faite le 24/10/2026 : `%APPDATA%\mRemoteNG-backup-20261024-1946`.
 - Cette version de dev peut réenregistrer `confCons.xml` au format **2.9** : une ancienne version de mRemoteNG risque de ne plus le relire.
 - Même UpgradeCode que mRemoteNG officiel → **remplace** l'installation existante.
